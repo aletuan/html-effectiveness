@@ -54,6 +54,12 @@ Prompt (from [@trq212](https://x.com/trq212/status/2017024445244924382)):
 > - **Tradeoffs**: alternatives you considered and why you picked what you did
 > - **Open questions**: anything you'd want me to confirm or revise
 
+A concrete one-liner using the same pattern — useful for trying the template
+on something small:
+
+> Implement a small spec for an exponential-backoff helper and keep a running
+> `implementation-notes.html` as you go.
+
 ### Code review and understanding &rarr; `03`, `04`
 
 > Help me review this PR by creating an HTML artifact that describes it. I'm
