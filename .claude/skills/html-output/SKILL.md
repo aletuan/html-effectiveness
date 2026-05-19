@@ -33,8 +33,11 @@ The templates live in `templates/` next to this file. They are full, populated e
 | Triage / kanban-style board | `18-editor-triage-board.html` |
 | Feature flag editor / config UI | `19-editor-feature-flags.html` |
 | Prompt-tuning / LLM-evaluation editor | `20-editor-prompt-tuner.html` |
+| **Implementation notes — running log of decisions, deviations, tradeoffs, and open questions captured while implementing a spec** | `21-implementation-notes.html` |
 
 If the request straddles two categories, pick the one whose **structure** matches best, not the one whose subject matter matches. A "code review of PR #312" is a code review (03), even if it's about a frontend feature. A "writeup of PR #312 I just merged" is a PR writeup (17). Code review = feedback before merge; PR writeup = explaining a finished change.
+
+The spec-implementation triplet is similar: **implementation plan (16)** is written *before* code as a design doc with mockups; **implementation notes (21)** are kept *during* the build as a running log of decisions/tradeoffs/open questions; **PR writeup (17)** explains what shipped *after* the work is done. If the user says "implement X and keep a running log of decisions" → 21. If they say "plan how we'd build X" → 16. If they say "write up what we just merged" → 17.
 
 If nothing fits well, pick the closest structural match and adapt — don't force a poor fit. Common adaptation: `11-status-report.html` is a strong fallback for any "summary of recent work" artifact.
 

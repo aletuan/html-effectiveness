@@ -58,9 +58,10 @@ Pulled from `references/design-tokens.md` — these are what make the gallery fe
 
 ## How the skill picks a template
 
-`SKILL.md` contains a table mapping user intents to template filenames. Two distinctions matter:
+`SKILL.md` contains a table mapping user intents to template filenames. Three distinctions matter:
 
 - **Code review (03) vs. PR write-up (17):** review = feedback *before* merge; write-up = explaining a *finished* change.
+- **Plan (16) vs. notes (21) vs. write-up (17):** these are the spec-implementation triplet. Plan is written *before* code as a design doc with mockups and dataflow. Notes are kept *during* the build as a running log of decisions, deviations, tradeoffs, and open questions. Write-up explains what shipped *after*. When the user says "implement X and keep a running log of decisions" → 21.
 - **Structure beats subject matter.** A "code review of a frontend PR" is still template 03, not a design template. Pick by document shape, not topic.
 
 When something doesn't fit the table, `11-status-report.html` is the canonical fallback for any "summary of recent work."

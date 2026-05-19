@@ -17,7 +17,7 @@ numbered file directly in a browser.
 | Exploration | code approaches, visual designs |
 | Code | review, understanding, design systems, component variants |
 | Prototyping | animation, interaction |
-| Communication | slide deck, status report, incident report, PR write-up |
+| Communication | slide deck, status report, incident report, PR write-up, implementation notes |
 | Diagrams & research | flowchart, feature/concept explainers |
 | Custom editing UIs | triage board, feature flags, prompt tuner |
 
@@ -28,7 +28,7 @@ Prompts that get good results from Claude Code, drawn from the
 Each maps to one or more templates in the gallery above. Use them as-is or
 adapt the framing to your own task.
 
-### Specs, planning, and exploration &rarr; `01`, `02`, `16`
+### Specs, planning, and exploration &rarr; `01`, `02`, `16`, `21`
 
 > I'm not sure what direction to take the onboarding screen. Generate 6
 > distinctly different approaches — vary layout, tone, and density — and lay
@@ -38,6 +38,21 @@ adapt the framing to your own task.
 > Create a thorough implementation plan in an HTML file. Make some mockups,
 > show data flow, and add important code snippets I might want to review.
 > Make it easy to read and digest.
+
+The third doc in this group is `21-implementation-notes.html` — a *running
+log* kept while building, so the spec → plan → implementation chain ends with
+a document that captures judgment calls instead of hiding them in the diff.
+Prompt (from [@trq212](https://x.com/trq212/status/2017024445244924382)):
+
+> Implement &lt;SPEC&gt;. As you work maintain a running
+> `implementation-notes.html` file that captures anything I should know about
+> how the implementation diverges from or interprets the spec, including:
+>
+> - **Design decisions**: choices you made where the spec was ambiguous
+> - **Deviations**: places where you intentionally departed from the spec, and
+>   why
+> - **Tradeoffs**: alternatives you considered and why you picked what you did
+> - **Open questions**: anything you'd want me to confirm or revise
 
 ### Code review and understanding &rarr; `03`, `04`
 
