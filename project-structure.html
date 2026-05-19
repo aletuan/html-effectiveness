@@ -1,0 +1,480 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How html-effectiveness is laid out</title>
+<style>
+  :root {
+    --ivory: #FAF9F5;
+    --slate: #141413;
+    --clay: #D97757;
+    --oat: #E3DACC;
+    --olive: #788C5D;
+    --rust: #B04A3F;
+    --gray-150: #F0EEE6;
+    --gray-300: #D1CFC5;
+    --gray-500: #87867F;
+    --gray-700: #3D3D3A;
+    --serif: ui-serif, Georgia, 'Times New Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ivory);
+    color: var(--gray-700);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 48px 24px 80px;
+  }
+
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 40px;
+  }
+
+  @media (max-width: 960px) {
+    .page { grid-template-columns: 1fr; }
+  }
+
+  header {
+    grid-column: 1 / -1;
+    margin-bottom: 8px;
+  }
+
+  .repo-line {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.25;
+    color: var(--slate);
+    margin-bottom: 16px;
+  }
+
+  .summary {
+    max-width: 760px;
+    font-size: 15.5px;
+  }
+  .summary code { font-family: var(--mono); font-size: 13px; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--slate);
+    margin: 36px 0 16px;
+  }
+
+  /* ---------- Tree panel ---------- */
+  .tree-panel {
+    border: 1.5px solid var(--gray-300);
+    border-radius: 12px;
+    background: #fff;
+    padding: 22px 26px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--slate);
+    overflow-x: auto;
+  }
+
+  .tree-panel .dim   { color: var(--gray-500); }
+  .tree-panel .dir   { color: var(--slate); font-weight: 600; }
+  .tree-panel .hot   { color: var(--clay); }
+  .tree-panel .note  { color: var(--gray-500); font-family: var(--sans); font-size: 12.5px; font-style: italic; }
+  .tree-panel .line  { display: block; white-space: pre; }
+
+  /* ---------- Walkthrough ---------- */
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 18px;
+    padding: 20px 0;
+    border-bottom: 1.5px solid var(--gray-150);
+  }
+  .step:last-of-type { border-bottom: none; }
+
+  .badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--oat);
+    border: 1.5px solid var(--gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--slate);
+    font-size: 14px;
+  }
+  .step.hot .badge {
+    background: rgba(217,119,87,0.14);
+    border-color: var(--clay);
+    color: var(--clay);
+  }
+
+  .step-loc {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 6px;
+  }
+  .step-loc .range { color: var(--gray-500); }
+
+  .step-body p { margin-bottom: 10px; }
+  .step-body p:last-child { margin-bottom: 0; }
+  .step-body code { font-family: var(--mono); font-size: 12.5px; }
+
+  details.snippet { margin-top: 6px; }
+  details.snippet summary {
+    list-style: none;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--gray-500);
+    font-family: var(--mono);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    user-select: none;
+  }
+  details.snippet summary::-webkit-details-marker { display: none; }
+  details.snippet summary::before {
+    content: "▸";
+    font-size: 10px;
+    transition: transform 0.15s ease;
+  }
+  details.snippet[open] summary::before { transform: rotate(90deg); }
+
+  pre.code {
+    background: var(--slate);
+    color: #E8E6DC;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin-top: 10px;
+  }
+  pre.code .dim { color: var(--gray-500); }
+  pre.code .kw  { color: #C9B98A; }
+  pre.code .str { color: #A8BC8C; }
+
+  /* ---------- Category grid ---------- */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  @media (max-width: 720px) {
+    .cat-grid { grid-template-columns: 1fr; }
+  }
+
+  .cat {
+    border: 1px solid var(--gray-150);
+    border-radius: 10px;
+    background: #fff;
+    padding: 14px 16px;
+  }
+  .cat-name {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--slate);
+    margin-bottom: 4px;
+  }
+  .cat-files {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--gray-500);
+    line-height: 1.7;
+  }
+
+  /* ---------- Sidebar ---------- */
+  aside {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+
+  .panel {
+    border: 1.5px solid var(--gray-300);
+    border-radius: 12px;
+    background: #fff;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+
+  .panel h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    margin-bottom: 12px;
+  }
+
+  .key-files { list-style: none; padding: 0; }
+  .key-files li { margin-bottom: 12px; }
+  .key-files li:last-child { margin-bottom: 0; }
+  .key-files .path {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--slate);
+    display: block;
+    margin-bottom: 2px;
+    word-break: break-all;
+  }
+  .key-files .desc {
+    font-size: 12.5px;
+    color: var(--gray-500);
+    line-height: 1.45;
+  }
+
+  .gotchas {
+    border: 1.5px solid var(--clay);
+    border-radius: 12px;
+    background: rgba(217,119,87,0.06);
+    padding: 18px 20px;
+  }
+  .gotchas h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--clay);
+    margin-bottom: 10px;
+  }
+  .gotchas ul { list-style: none; padding: 0; }
+  .gotchas li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .gotchas li:last-child { margin-bottom: 0; }
+  .gotchas li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px;
+    width: 5px; height: 5px;
+    background: var(--clay);
+    border-radius: 2px;
+  }
+  .gotchas code { font-family: var(--mono); font-size: 11.5px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="repo-line">html-effectiveness · project structure</div>
+    <h1>How the repo is laid out</h1>
+    <p class="summary">
+      The repo is intentionally flat: 20 numbered <code>.html</code> files at the top level are the actual artifacts, an <code>index.html</code> stitches them into a categorized gallery, and a parallel copy lives inside <code>.claude/skills/html-output/</code> so Claude Code can use the same files as templates. There is no build step, no <code>node_modules</code>, no shared <code>style.css</code> — each example is a single self-contained page and the duplication is on purpose.
+    </p>
+  </header>
+
+  <main>
+    <h2 style="margin-top:0">Directory tree</h2>
+    <div class="tree-panel">
+<span class="line"><span class="dir">html-effectiveness/</span></span>
+<span class="line">├── <span class="hot">index.html</span>                          <span class="note">gallery entry point — links to all 20 examples</span></span>
+<span class="line">├── 01-exploration-code-approaches.html</span>
+<span class="line">├── 02-exploration-visual-designs.html</span>
+<span class="line">├── 03-code-review-pr.html</span>
+<span class="line">├── 04-code-understanding.html</span>
+<span class="line">├── 05-design-system.html</span>
+<span class="line">├── 06-component-variants.html</span>
+<span class="line">├── 07-prototype-animation.html</span>
+<span class="line">├── 08-prototype-interaction.html</span>
+<span class="line">├── 09-slide-deck.html</span>
+<span class="line">├── 10-svg-illustrations.html</span>
+<span class="line">├── 11-status-report.html</span>
+<span class="line">├── 12-incident-report.html</span>
+<span class="line">├── 13-flowchart-diagram.html</span>
+<span class="line">├── 14-research-feature-explainer.html</span>
+<span class="line">├── 15-research-concept-explainer.html</span>
+<span class="line">├── 16-implementation-plan.html</span>
+<span class="line">├── 17-pr-writeup.html</span>
+<span class="line">├── 18-editor-triage-board.html</span>
+<span class="line">├── 19-editor-feature-flags.html</span>
+<span class="line">├── 20-editor-prompt-tuner.html</span>
+<span class="line">│</span>
+<span class="line">├── <span class="dim">README.md</span>                            <span class="note">project intro</span></span>
+<span class="line">├── <span class="dim">LICENSE</span>                              <span class="note">Apache 2.0</span></span>
+<span class="line">├── <span class="dim">SECURITY.md</span>                          <span class="note">how to report vulnerabilities</span></span>
+<span class="line">├── <span class="dim">CODE_OF_CONDUCT.md</span></span>
+<span class="line">│</span>
+<span class="line">└── <span class="dir">.claude/</span></span>
+<span class="line">    └── <span class="dir">skills/</span></span>
+<span class="line">        └── <span class="hot">html-output/</span>                  <span class="note">Claude Code skill</span></span>
+<span class="line">            ├── <span class="hot">SKILL.md</span>                  <span class="note">picks template + drives workflow</span></span>
+<span class="line">            ├── <span class="dir">templates/</span>                <span class="note">copies of the 20 numbered files</span></span>
+<span class="line">            │   ├── 01-exploration-code-approaches.html</span>
+<span class="line">            │   ├── … <span class="dim">(18 more)</span></span>
+<span class="line">            │   └── 20-editor-prompt-tuner.html</span>
+<span class="line">            └── <span class="dir">references/</span></span>
+<span class="line">                └── <span class="dim">design-tokens.md</span>      <span class="note">shared palette / typography</span></span>
+    </div>
+
+    <h2>Two halves, one shared spine</h2>
+
+    <div class="step hot">
+      <div class="badge">1</div>
+      <div class="step-body">
+        <div class="step-loc">./*.html<span class="range"> — 21 files at the top level</span></div>
+        <p>The numbered files are the deliverable. Each one is a complete, double-clickable webpage with its own <code>&lt;style&gt;</code> block inline and no external requests. There is no shared CSS file by design — every page has to stand on its own, so a user who finds <code>12-incident-report.html</code> through a search engine gets the full thing in one download.</p>
+        <p>The numbering encodes both the category (see grid below) and a rough reading order from "compare options" through "communicate finished work" to "interactive editors". <code>index.html</code> is the only file that knows about the others — it links to all 20 with thumbnails and category headings.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">2</div>
+      <div class="step-body">
+        <div class="step-loc">index.html<span class="range"> — the gallery</span></div>
+        <p>Read this first if you're new. It groups the 20 examples into the six categories described in the README, gives each a short blurb, and links straight to the file. Open it in a browser and you can navigate the whole gallery without touching the filesystem.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">3</div>
+      <div class="step-body">
+        <div class="step-loc">.claude/skills/html-output/SKILL.md<span class="range"> — the skill spec</span></div>
+        <p>This is what turns the gallery into a Claude Code skill. <code>SKILL.md</code> has a table that maps "what the user wants" (a PR review, a status report, a postmortem) to the matching template file, then walks Claude through the workflow: pick a template, copy the <code>&lt;style&gt;</code> block verbatim, mirror the section structure, swap placeholder content for real content, output a single self-contained <code>.html</code>.</p>
+        <p>The skill auto-loads when Claude Code is run from inside this repo. Copy the folder to <code>~/.claude/skills/</code> to use it from anywhere — see step 5.</p>
+        <details class="snippet">
+          <summary>show frontmatter</summary>
+<pre class="code"><span class="dim">--- .claude/skills/html-output/SKILL.md ---</span>
+name: html-output
+description: Produces a polished, self-contained .html file
+  styled in a warm ivory/clay/oat palette for documents like
+  PR reviews, code walkthroughs, status reports, incident
+  reports, design system pages, slide decks, implementation
+  plans, research explainers, flowcharts, and small interactive
+  editor UIs.</pre>
+        </details>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">4</div>
+      <div class="step-body">
+        <div class="step-loc">.claude/skills/html-output/templates/<span class="range"> — duplicated on purpose</span></div>
+        <p>The 20 files under <code>templates/</code> are copies of the top-level numbered files. The duplication keeps the two use cases independent: the top-level files are the human-facing gallery (a viewer expects them at the URLs <code>README.md</code> documents), and the <code>templates/</code> copies are what the skill reads when Claude builds a new artifact. Changing one and forgetting the other will drift the gallery from the skill — keep them in sync.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="badge">5</div>
+      <div class="step-body">
+        <div class="step-loc">.claude/skills/html-output/references/design-tokens.md</div>
+        <p>The single source of truth for the palette (<code>--ivory</code>, <code>--slate</code>, <code>--clay</code>, <code>--oat</code>, <code>--olive</code>…) and the serif/sans/mono trio. Every template inlines these tokens at the top of its <code>&lt;style&gt;</code> block, which is why the gallery feels visually consistent despite each file being independent.</p>
+      </div>
+    </div>
+
+    <h2>The 20 examples, by category</h2>
+    <div class="cat-grid">
+      <div class="cat">
+        <div class="cat-name">Exploration</div>
+        <div class="cat-files">01-exploration-code-approaches<br>02-exploration-visual-designs</div>
+      </div>
+      <div class="cat">
+        <div class="cat-name">Code</div>
+        <div class="cat-files">03-code-review-pr<br>04-code-understanding<br>05-design-system<br>06-component-variants</div>
+      </div>
+      <div class="cat">
+        <div class="cat-name">Prototyping</div>
+        <div class="cat-files">07-prototype-animation<br>08-prototype-interaction</div>
+      </div>
+      <div class="cat">
+        <div class="cat-name">Communication</div>
+        <div class="cat-files">09-slide-deck<br>11-status-report<br>12-incident-report<br>17-pr-writeup</div>
+      </div>
+      <div class="cat">
+        <div class="cat-name">Diagrams &amp; research</div>
+        <div class="cat-files">10-svg-illustrations<br>13-flowchart-diagram<br>14-research-feature-explainer<br>15-research-concept-explainer<br>16-implementation-plan</div>
+      </div>
+      <div class="cat">
+        <div class="cat-name">Custom editing UIs</div>
+        <div class="cat-files">18-editor-triage-board<br>19-editor-feature-flags<br>20-editor-prompt-tuner</div>
+      </div>
+    </div>
+  </main>
+
+  <aside>
+    <div class="panel">
+      <h3>Key paths</h3>
+      <ul class="key-files">
+        <li>
+          <span class="path">index.html</span>
+          <span class="desc">Categorized gallery — start here.</span>
+        </li>
+        <li>
+          <span class="path">01..20-*.html</span>
+          <span class="desc">The 20 self-contained example artifacts.</span>
+        </li>
+        <li>
+          <span class="path">.claude/skills/html-output/SKILL.md</span>
+          <span class="desc">Skill spec — template-picker table and workflow.</span>
+        </li>
+        <li>
+          <span class="path">.claude/skills/html-output/templates/</span>
+          <span class="desc">Copies of the 20 files, read by the skill.</span>
+        </li>
+        <li>
+          <span class="path">.claude/skills/html-output/references/design-tokens.md</span>
+          <span class="desc">Shared palette + typography reference.</span>
+        </li>
+        <li>
+          <span class="path">README.md</span>
+          <span class="desc">Project overview and install snippet.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="gotchas">
+      <h3>Gotchas</h3>
+      <ul>
+        <li>Top-level files and <code>templates/</code> copies are duplicated by design — if you edit one, mirror the change to keep the gallery and skill in sync.</li>
+        <li>No build step and no shared stylesheet: each <code>.html</code> inlines its own tokens. Refactoring "common" CSS out would break the self-contained promise.</li>
+        <li>The skill auto-loads only inside this repo. For global use, copy <code>.claude/skills/html-output</code> to <code>~/.claude/skills/</code>.</li>
+      </ul>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  var snippets = document.querySelectorAll('details.snippet');
+  snippets.forEach(function (d) {
+    d.addEventListener('toggle', function () {
+      if (!d.open) return;
+      snippets.forEach(function (other) {
+        if (other !== d) other.open = false;
+      });
+    });
+  });
+</script>
+</body>
+</html>
