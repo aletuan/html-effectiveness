@@ -1,0 +1,574 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Implementation notes — Comment threads on task cards</title>
+<style>
+  :root {
+    --ivory:    #FAF9F5;
+    --slate:    #141413;
+    --clay:     #D97757;
+    --oat:      #E3DACC;
+    --olive:    #788C5D;
+    --rust:     #B04A3F;
+    --gray-150: #F0EEE6;
+    --gray-300: #D1CFC5;
+    --gray-500: #87867F;
+    --gray-700: #3D3D3A;
+    --white:    #FFFFFF;
+
+    --serif: ui-serif, Georgia, "Times New Roman", serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --border: 1.5px solid var(--gray-300);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    padding: 56px 24px 120px;
+    background: var(--ivory);
+    color: var(--slate);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+  header { margin-bottom: 40px; }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .live-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--clay);
+    background: rgba(217, 119, 87, 0.10);
+    border: 1.5px solid var(--clay);
+    border-radius: 999px;
+    padding: 5px 12px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .live-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--clay);
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 18px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--gray-500);
+  }
+  .meta-row span { display: inline-flex; align-items: center; gap: 6px; }
+  .meta-row strong { color: var(--gray-700); font-weight: 500; }
+  .meta-row a {
+    color: var(--clay);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+  }
+  .meta-row a:hover { border-bottom-color: var(--clay); }
+
+  /* ---------- Summary band ---------- */
+  .summary-band {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 56px;
+  }
+  @media (max-width: 720px) {
+    .summary-band { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 18px;
+  }
+  .stat-card.warn {
+    border-left: 4px solid var(--rust);
+    padding-left: 19px;
+  }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 44px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray-500);
+  }
+  .stat-hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 6px;
+    color: var(--gray-500);
+  }
+  .stat-hint.attn { color: var(--rust); }
+
+  /* ---------- Section chrome ---------- */
+  section.notes { margin-bottom: 56px; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+
+  .sec-blurb {
+    font-size: 13.5px;
+    color: var(--gray-500);
+    margin-bottom: 22px;
+    max-width: 640px;
+  }
+
+  hr.rule {
+    border: none;
+    border-top: 1px solid var(--gray-300);
+    margin: 0 0 22px;
+  }
+
+  /* ---------- Note entry ---------- */
+  .entry {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--gray-150);
+  }
+  .entry:last-child { border-bottom: none; }
+
+  .entry-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 3px 9px;
+    border-radius: 5px;
+    border: 1.5px solid var(--gray-300);
+    background: var(--white);
+    color: var(--gray-700);
+  }
+  .tag.decision  { background: var(--oat);                   border-color: var(--oat);   color: var(--slate); }
+  .tag.deviation { background: rgba(217,119,87,0.10);        border-color: var(--clay);  color: var(--clay); }
+  .tag.tradeoff  { background: rgba(120,140,93,0.12);        border-color: var(--olive); color: var(--olive); }
+  .tag.open      { background: rgba(176, 74, 63,0.10);       border-color: var(--rust);  color: var(--rust); }
+
+  .entry-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--slate);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .entry-refs {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--gray-500);
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 14px;
+  }
+  .entry-refs span::before { content: "§ "; color: var(--gray-300); margin-right: 1px; }
+  .entry-refs code { font-family: var(--mono); color: var(--gray-700); }
+  .entry-refs code::before { content: ""; }
+  .entry-refs span.path::before { content: ""; }
+  .entry-refs span.path code { color: var(--clay); }
+
+  .entry-body {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--gray-700);
+    max-width: 720px;
+  }
+  .entry-body p + p { margin-top: 10px; }
+  .entry-body code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--gray-150);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--slate);
+  }
+
+  .sub-block {
+    margin-top: 14px;
+    background: var(--gray-150);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .sub-block .sub-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--gray-500);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .open .entry-body {
+    border-left: 3px solid var(--rust);
+    padding-left: 14px;
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-300);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gray-500);
+  }
+  footer .row { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  footer a {
+    color: var(--clay);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+  }
+  footer a:hover { border-bottom-color: var(--clay); }
+</style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ============================================================
+         Header
+         ============================================================ -->
+    <header>
+      <div class="header-top">
+        <h1>Implementation notes &mdash; Comment threads on task cards</h1>
+        <span class="live-pill">in progress</span>
+      </div>
+      <div class="meta-row">
+        <span>spec <a href="#">SPEC-238</a></span>
+        <span>repo <strong>acme/app</strong></span>
+        <span>branch <strong>feat/comment-threads</strong></span>
+        <span>updated <strong>Mar 16 · 18:04</strong> (47 min ago)</span>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         Summary band
+         ============================================================ -->
+    <div class="summary-band">
+      <div class="stat-card">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Design decisions</div>
+        <div class="stat-hint">spec gaps filled in</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Deviations</div>
+        <div class="stat-hint">intentional, justified</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Tradeoffs</div>
+        <div class="stat-hint">alternatives considered</div>
+      </div>
+      <div class="stat-card warn">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Open questions</div>
+        <div class="stat-hint attn">need confirmation</div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         Design decisions
+         ============================================================ -->
+    <section class="notes">
+      <div class="sec-head"><h2>Design decisions</h2></div>
+      <p class="sec-blurb">
+        Choices made where the spec was ambiguous or silent. Default to
+        existing patterns in the codebase; flag here so you can override.
+      </p>
+      <hr class="rule">
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag decision">Decision</span></div>
+        <div class="entry-title">Reuse the existing Markdown renderer instead of pulling in <code>mdast-util-from-markdown</code></div>
+        <div class="entry-refs">
+          <span>SPEC §3.2 (formatting)</span>
+          <span class="path"><code>src/comments/Body.tsx:18</code></span>
+        </div>
+        <div class="entry-body">
+          The spec says comments support &ldquo;basic Markdown&rdquo; but doesn&rsquo;t
+          enumerate which features. The codebase already ships a hardened renderer
+          used by task descriptions (links, bold, lists, fenced code) so I wired
+          comments through that. Adds zero new dependencies and matches the rendering
+          of task descriptions for free.
+        </div>
+        <div class="sub-block">
+          <span class="sub-label">If you wanted GFM tables or task lists</span>
+          The shared renderer doesn&rsquo;t do those. Adding them is a separate change
+          and should land in the renderer module, not the comments code.
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag decision">Decision</span></div>
+        <div class="entry-title">Cache <code>thread_head_count</code> on the task row, not in a separate denorm table</div>
+        <div class="entry-refs">
+          <span>SPEC §4.1 (board view perf)</span>
+          <span class="path"><code>db/migrations/0142_thread_head.sql</code></span>
+        </div>
+        <div class="entry-body">
+          Spec calls for board-view perf parity (&lt;120ms p95) but doesn&rsquo;t prescribe
+          a strategy. A column on <code>tasks</code> is the smallest change that meets
+          the bar — board queries already select the row, so the count comes along for
+          free. Updates happen inside the comment create/delete transaction.
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag decision">Decision</span></div>
+        <div class="entry-title">Server-rendered relative timestamps, absolute on hover</div>
+        <div class="entry-refs">
+          <span>SPEC §5.4 (&ldquo;show relative time&rdquo;)</span>
+          <span class="path"><code>src/comments/Timestamp.tsx</code></span>
+        </div>
+        <div class="entry-body">
+          &ldquo;Relative time&rdquo; is underspecified — client-side ticking is the
+          obvious option but it&rsquo;s an accessibility nightmare and re-render churn.
+          Went with server-rendered strings (&ldquo;3 min ago&rdquo;, &ldquo;yesterday&rdquo;)
+          and a <code>&lt;time title="..."&gt;</code> tooltip for the exact value.
+          Matches how task activity rows already work.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Deviations
+         ============================================================ -->
+    <section class="notes">
+      <div class="sec-head"><h2>Deviations</h2></div>
+      <p class="sec-blurb">
+        Places I built something different from what the spec said. Each has a
+        reason — push back if any of these don&rsquo;t match what you wanted.
+      </p>
+      <hr class="rule">
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag deviation">Deviation</span></div>
+        <div class="entry-title">Modal editor on Create, not inline as the spec mock shows</div>
+        <div class="entry-refs">
+          <span>SPEC §2.3 + Figma frame 4</span>
+          <span class="path"><code>src/comments/CommentComposer.tsx</code></span>
+        </div>
+        <div class="entry-body">
+          The mock shows an inline composer that expands beneath the last comment.
+          Keyboard focus and screen-reader semantics for &ldquo;area that grows
+          inline&rdquo; are not addressed in the spec — and we got bitten by exactly
+          this on the bulk-edit toolbar.
+        </div>
+        <div class="entry-body" style="margin-top:10px">
+          Built a modal with a single &lt;textarea&gt; instead. Same affordance, much
+          simpler focus handling. If you want the inline version, the modal can be
+          swapped without touching the data layer.
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag deviation">Deviation</span></div>
+        <div class="entry-title">No new endpoint — comments returned via <code>GET /tasks/:id?include=thread</code></div>
+        <div class="entry-refs">
+          <span>SPEC §6.1 (API)</span>
+          <span class="path"><code>src/server/routes/tasks.ts:88</code></span>
+        </div>
+        <div class="entry-body">
+          Spec §6.1 lists <code>GET /tasks/:id/comments</code> as a new endpoint.
+          But the board view already fetches the task, and a second round-trip per
+          card would blow the perf budget. Added an <code>include=thread</code>
+          query param to the existing endpoint, gated behind the same authz check.
+          Adds <code>thread</code> only when requested, so the bare <code>GET /tasks/:id</code>
+          response shape is unchanged.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Tradeoffs
+         ============================================================ -->
+    <section class="notes">
+      <div class="sec-head"><h2>Tradeoffs</h2></div>
+      <p class="sec-blurb">
+        Choices with a real alternative. Recording the loser and the reason so we
+        can revisit if conditions change.
+      </p>
+      <hr class="rule">
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag tradeoff">Tradeoff</span></div>
+        <div class="entry-title">Optimistic UI with rollback, not server-confirm</div>
+        <div class="entry-refs">
+          <span>perceived latency vs. consistency</span>
+          <span class="path"><code>src/comments/store.ts:104</code></span>
+        </div>
+        <div class="entry-body">
+          Comments appear immediately on the sender&rsquo;s screen with a faint
+          &ldquo;sending…&rdquo; opacity, then either confirm or rollback with a
+          toast. The other option — wait for server confirmation — is simpler but
+          adds ~180ms of dead time per comment in the staging numbers.
+        </div>
+        <div class="sub-block">
+          <span class="sub-label">Considered: server-confirm</span>
+          Cleaner code path (one source of truth) but 180ms feels long for a chat-like
+          interaction. Optimistic with rollback is what task title edits already do.
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag tradeoff">Tradeoff</span></div>
+        <div class="entry-title">Polling for new comments, not SSE</div>
+        <div class="entry-refs">
+          <span>infra readiness</span>
+          <span class="path"><code>src/comments/usePolling.ts</code></span>
+        </div>
+        <div class="entry-body">
+          We don&rsquo;t have a shared SSE/WebSocket layer in this service, and adding
+          one for comments alone is a separate &mdash; bigger &mdash; project. Kept
+          the polling pattern used elsewhere (12s interval, exponential backoff on
+          error). Drop-in replacement when the real-time layer lands.
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-top"><span class="tag tradeoff">Tradeoff</span></div>
+        <div class="entry-title">Soft delete (tombstone row), not hard delete</div>
+        <div class="entry-refs">
+          <span>matches existing pattern</span>
+          <span class="path"><code>src/comments/delete.ts</code></span>
+        </div>
+        <div class="entry-body">
+          Tasks already tombstone with a <code>deleted_at</code> column for the
+          30-day undo window. Comments now do the same. Hard delete saves storage
+          but breaks the undo affordance and complicates audit log queries that
+          join through comments.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Open questions
+         ============================================================ -->
+    <section class="notes">
+      <div class="sec-head"><h2>Open questions</h2></div>
+      <p class="sec-blurb">
+        Things I had to assume but want you to confirm before I lock in.
+        Replying inline on the PR is enough — I&rsquo;ll resolve them from there.
+      </p>
+      <hr class="rule">
+
+      <div class="entry open">
+        <div class="entry-top"><span class="tag open">Open</span></div>
+        <div class="entry-title">@mentions: workspace members only, or include guests?</div>
+        <div class="entry-refs">
+          <span>SPEC §3.5 (mentions)</span>
+        </div>
+        <div class="entry-body">
+          Spec says &ldquo;mentionable users&rdquo; without defining the set. Right
+          now the dropdown filters to active workspace <strong>members</strong>;
+          guests aren&rsquo;t suggested even though they can read the task. If guests
+          should be mentionable, the change is one predicate in
+          <code>useMentionables.ts</code> — small.
+        </div>
+        <div class="sub-block">
+          <span class="sub-label">My assumption (revertible)</span>
+          Members only. Guests can read the comment but won&rsquo;t be auto-notified
+          on mention.
+        </div>
+      </div>
+
+      <div class="entry open">
+        <div class="entry-top"><span class="tag open">Open</span></div>
+        <div class="entry-title">Retention when the parent task is archived</div>
+        <div class="entry-refs">
+          <span>not addressed in spec</span>
+        </div>
+        <div class="entry-body">
+          Archiving a task hides it but keeps the row indefinitely. Comments inherit
+          that today — they live forever alongside the archived task. If there&rsquo;s
+          a PII / retention policy I should follow (e.g., purge after 12 months of
+          archive), the cron job to enforce it is a separate change.
+        </div>
+        <div class="sub-block">
+          <span class="sub-label">My assumption (revertible)</span>
+          Indefinite retention, matching task rows.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Footer
+         ============================================================ -->
+    <footer>
+      <div class="row">
+        <span>spec <a href="#">SPEC-238</a></span>
+        <span>PR <a href="#">#4901</a></span>
+        <span>diff <code>main..feat/comment-threads</code></span>
+        <span>generated by Claude Code · Mar 16 18:04</span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>
