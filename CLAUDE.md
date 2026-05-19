@@ -65,6 +65,19 @@ Pulled from `references/design-tokens.md` — these are what make the gallery fe
 
 When something doesn't fit the table, `11-status-report.html` is the canonical fallback for any "summary of recent work."
 
+## Editor templates (`18`, `19`, `20`) — the export button is the point
+
+These three templates are different from the other 17. They are **throwaway editors**: a single HTML file purpose-built for one specific piece of data the user is wrangling (kanban tickets, flag config, a prompt template). The UI handles parts that are awkward in text — drag-and-drop, toggles, live preview — but the loop between user and Claude stays text-based.
+
+This means every editor template **must** end with an export/copy button that puts structured text (Markdown / JSON / a diff / a prompt string) on the clipboard. Without it, whatever the user did in the UI is trapped in the browser — Claude can't see it. The export button is the bridge that keeps the agentic loop closed.
+
+Current implementations (treat as canonical):
+- `18-editor-triage-board.html` — "Copy as Markdown" (kanban → markdown bullets per column)
+- `19-editor-feature-flags.html` — "Copy diff" + "Copy full JSON" (flag toggles → ±diff or full JSON)
+- `20-editor-prompt-tuner.html` — "Copy prompt" (edited prompt template → plain text)
+
+If you generate a new editor-style template, the same rule applies: end with a copy/export button, output structured plain text, never require a server or file save. The UI is one-off; the text round-trip is what makes it useful to an agent.
+
 ## When generating a new artifact (e.g., via the skill)
 
 The workflow lives in `SKILL.md`, but the things that go wrong most often:
