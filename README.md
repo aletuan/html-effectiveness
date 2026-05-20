@@ -14,7 +14,7 @@ numbered file directly in a browser.
 
 | Category | Examples |
 |---|---|
-| Exploration | code approaches, visual designs |
+| Exploration | code approaches, visual designs, spike report |
 | Code | review, understanding, design systems, component variants |
 | Prototyping | animation, interaction |
 | Communication | slide deck, status report, incident report, PR write-up, implementation notes |
@@ -28,7 +28,7 @@ Prompts that get good results from Claude Code, drawn from the
 Each maps to one or more templates in the gallery above. Use them as-is or
 adapt the framing to your own task.
 
-### Specs, planning, and exploration &rarr; `01`, `02`, `16`, `21`
+### Specs, planning, and exploration &rarr; `01`, `02`, `16`, `21`, `22`
 
 > I'm not sure what direction to take the onboarding screen. Generate 6
 > distinctly different approaches — vary layout, tone, and density — and lay
@@ -59,6 +59,17 @@ on something small:
 
 > Implement a small spec for an exponential-backoff helper and keep a running
 > `implementation-notes.html` as you go.
+
+Earlier in the chain, before you commit to a plan, sits `22-spike-report.html`
+— the investigation that produces a recommendation. Where template 01 fans
+out options to react to, a spike report **converges** to a recommendation
+with effort estimates and a timeline. Sample prompt:
+
+> I want to investigate how to deliver real-time updates for the activity
+> feed. Look at polling, SSE, and WebSockets. For each: effort estimate,
+> risk, timeline within Q2, pros/cons. End with a comparison matrix, a
+> recommendation, and the open questions that still need to be resolved
+> before we commit. Output as a single HTML spike report.
 
 ### Code review and understanding &rarr; `03`, `04`
 

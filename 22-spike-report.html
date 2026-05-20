@@ -1,0 +1,790 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spike — Real-time updates for the activity feed</title>
+  <style>
+    :root {
+      --ivory:    #FAF9F5;
+      --slate:    #141413;
+      --clay:     #D97757;
+      --oat:      #E3DACC;
+      --olive:    #788C5D;
+      --rust:     #B04A3F;
+      --gray-150: #F0EEE6;
+      --gray-300: #D1CFC5;
+      --gray-500: #87867F;
+      --gray-700: #3D3D3A;
+      --white:    #FFFFFF;
+
+      --serif: ui-serif, Georgia, 'Times New Roman', serif;
+      --sans:  system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --mono:  ui-monospace, 'SF Mono', Menlo, Monaco, monospace;
+
+      --border: 1.5px solid var(--gray-300);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--ivory);
+      color: var(--gray-700);
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 56px 32px 96px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page { max-width: 1200px; margin: 0 auto; }
+
+    /* ---------- Header ---------- */
+    header.page-head { margin-bottom: 44px; }
+
+    .header-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 36px;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--slate);
+      max-width: 880px;
+    }
+
+    .status-pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 5px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .status-pill.ready {
+      color: var(--olive);
+      background: rgba(120, 140, 93, 0.10);
+      border: 1.5px solid var(--olive);
+    }
+    .status-pill.ready::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--olive);
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 18px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--gray-500);
+    }
+    .meta-row span { display: inline-flex; align-items: center; gap: 6px; }
+    .meta-row strong { color: var(--gray-700); font-weight: 500; }
+    .meta-row a {
+      color: var(--clay);
+      text-decoration: none;
+      border-bottom: 1px dotted transparent;
+    }
+    .meta-row a:hover { border-bottom-color: var(--clay); }
+
+    /* ---------- Section chrome ---------- */
+    section { margin-bottom: 56px; }
+
+    h2 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: -0.01em;
+      color: var(--slate);
+      margin-bottom: 8px;
+    }
+
+    hr.rule {
+      border: none;
+      border-top: 1px solid var(--gray-300);
+      margin: 0 0 22px;
+    }
+
+    /* ---------- Context + Constraints ---------- */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 28px;
+    }
+    @media (max-width: 880px) { .intro-grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--white);
+      border: var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+    }
+    .panel h3 {
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-bottom: 14px;
+    }
+    .panel p { margin-bottom: 10px; font-size: 14.5px; }
+    .panel p:last-child { margin-bottom: 0; }
+
+    .panel ul.bullets {
+      list-style: none;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .panel ul.bullets li {
+      position: relative;
+      padding-left: 18px;
+      margin-bottom: 8px;
+    }
+    .panel ul.bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--clay);
+    }
+    .panel ul.bullets li:last-child { margin-bottom: 0; }
+
+    /* ---------- Option panels ---------- */
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+    @media (max-width: 1024px) { .options { grid-template-columns: 1fr; } }
+
+    .option {
+      background: var(--white);
+      border: var(--border);
+      border-radius: 12px;
+      padding: 22px 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .option.picked {
+      border: 1.5px solid var(--olive);
+      box-shadow: 0 0 0 4px rgba(120, 140, 93, 0.08);
+    }
+
+    .opt-head { display: flex; flex-direction: column; gap: 8px; }
+    .opt-head .letter {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--oat);
+      color: var(--slate);
+      padding: 2px 9px;
+      border-radius: 8px;
+      margin-right: 8px;
+      vertical-align: 2px;
+    }
+    .option.picked .opt-head .letter {
+      background: rgba(120, 140, 93, 0.18);
+      color: var(--olive);
+    }
+    .opt-head h3 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 19px;
+      color: var(--slate);
+      line-height: 1.25;
+    }
+    .opt-head p {
+      font-size: 13.5px;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+
+    .opt-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      padding: 4px 10px;
+      border-radius: 7px;
+      border: 1.5px solid var(--gray-300);
+      color: var(--gray-700);
+      background: var(--white);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge strong { color: var(--slate); font-weight: 600; }
+    .badge.effort-low    { background: rgba(120,140,93,0.10); border-color: var(--olive); color: var(--olive); }
+    .badge.effort-med    { background: rgba(217,119,87,0.10); border-color: var(--clay);  color: var(--clay); }
+    .badge.effort-high   { background: rgba(176, 74,63,0.10); border-color: var(--rust);  color: var(--rust); }
+    .badge.risk-low      { background: rgba(120,140,93,0.10); border-color: var(--olive); color: var(--olive); }
+    .badge.risk-med      { background: rgba(217,119,87,0.10); border-color: var(--clay);  color: var(--clay); }
+    .badge.risk-high     { background: rgba(176, 74,63,0.10); border-color: var(--rust);  color: var(--rust); }
+
+    /* ---------- Pros/cons table inside option ---------- */
+    .tradeoffs {
+      border: 1.5px solid var(--gray-300);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .tradeoffs .row { display: grid; grid-template-columns: 1fr 1fr; }
+    .tradeoffs .row + .row { border-top: 1.5px solid var(--gray-300); }
+    .tradeoffs .cell { padding: 10px 14px; line-height: 1.5; }
+    .tradeoffs .cell:first-child { border-right: 1.5px solid var(--gray-300); }
+    .tradeoffs .head {
+      background: var(--gray-150);
+      font-weight: 600;
+      color: var(--slate);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tradeoffs .pro::before,
+    .tradeoffs .con::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: 2px;
+    }
+    .tradeoffs .pro::before { background: var(--olive); }
+    .tradeoffs .con::before { background: var(--clay); }
+
+    .opt-timeline {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--gray-500);
+      padding-top: 4px;
+      border-top: 1px solid var(--gray-150);
+    }
+    .opt-timeline strong { color: var(--gray-700); font-weight: 500; }
+
+    /* ---------- Comparison matrix ---------- */
+    table.matrix {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--white);
+      border: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 14px;
+    }
+    table.matrix thead th {
+      text-align: left;
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gray-500);
+      background: var(--gray-150);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-300);
+    }
+    table.matrix thead th.picked-col {
+      color: var(--olive);
+      background: rgba(120,140,93,0.10);
+    }
+    table.matrix tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-150);
+      vertical-align: middle;
+    }
+    table.matrix tbody tr:last-child td { border-bottom: none; }
+    table.matrix tbody td.crit {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--gray-700);
+      width: 28%;
+    }
+    table.matrix tbody td.picked-col {
+      background: rgba(120,140,93,0.05);
+      color: var(--slate);
+      font-weight: 500;
+    }
+    table.matrix .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 7px;
+      vertical-align: 1px;
+    }
+    .dot.low  { background: var(--olive); }
+    .dot.med  { background: var(--clay); }
+    .dot.high { background: var(--rust); }
+
+    /* ---------- Recommendation ---------- */
+    .reco {
+      border-left: 4px solid var(--olive);
+      background: var(--white);
+      border-top: var(--border);
+      border-right: var(--border);
+      border-bottom: var(--border);
+      border-radius: 0 12px 12px 0;
+      padding: 26px 30px;
+      max-width: 920px;
+    }
+    .reco .reco-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--olive);
+      margin-bottom: 8px;
+    }
+    .reco h2 {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 24px;
+      color: var(--slate);
+      margin-bottom: 14px;
+    }
+    .reco h2 .pick {
+      color: var(--olive);
+    }
+    .reco p { margin-bottom: 12px; font-size: 15px; }
+    .reco p:last-child { margin-bottom: 0; }
+    .reco code {
+      font-family: var(--mono);
+      font-size: 0.9em;
+      background: var(--gray-150);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--slate);
+    }
+
+    /* ---------- Open questions ---------- */
+    .opens {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .opens li {
+      background: var(--white);
+      border: 1.5px solid var(--gray-300);
+      border-left: 3px solid var(--rust);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      font-size: 14px;
+    }
+    .opens li strong {
+      color: var(--slate);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+      font-family: var(--serif);
+      font-size: 16px;
+    }
+    .opens li .next {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--gray-500);
+      margin-top: 6px;
+      display: block;
+    }
+
+    /* ---------- Next steps ---------- */
+    .next-steps {
+      counter-reset: ns;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .next-steps li {
+      counter-increment: ns;
+      position: relative;
+      padding: 14px 16px 14px 56px;
+      background: var(--white);
+      border: var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .next-steps li::before {
+      content: counter(ns, decimal-leading-zero);
+      position: absolute;
+      left: 18px;
+      top: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--clay);
+      font-weight: 600;
+    }
+    .next-steps li strong {
+      color: var(--slate);
+      font-weight: 600;
+    }
+    .next-steps li code {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      background: var(--gray-150);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--slate);
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      margin-top: 72px;
+      padding-top: 18px;
+      border-top: 1px solid var(--gray-300);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    footer .row { display: flex; flex-wrap: wrap; gap: 0 18px; }
+    footer a {
+      color: var(--clay);
+      text-decoration: none;
+      border-bottom: 1px dotted transparent;
+    }
+    footer a:hover { border-bottom-color: var(--clay); }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ============================================================
+         Header
+         ============================================================ -->
+    <header class="page-head">
+      <div class="eyebrow">Spike report &middot; SPIKE-042 &middot; 3 days of investigation</div>
+      <div class="header-top">
+        <h1>How should we deliver real-time updates to the activity feed?</h1>
+        <span class="status-pill ready">Ready for decision</span>
+      </div>
+      <div class="meta-row">
+        <span>owner <strong>M. Okafor</strong></span>
+        <span>started <strong>Apr 3</strong></span>
+        <span>decision needed by <strong>Apr 12</strong></span>
+        <span>spec <a href="#">PLATFORM-RFC-014</a></span>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         Context + Constraints
+         ============================================================ -->
+    <section class="intro-grid">
+      <div class="panel">
+        <h3>Context</h3>
+        <p>
+          The activity feed currently polls <code style="font-family:var(--mono);font-size:13px">/api/feed</code>
+          every 5&nbsp;seconds from every open tab. Three things prompted this spike:
+        </p>
+        <ul class="bullets">
+          <li>Polling now consumes <strong>~22%</strong> of API CPU at peak. Capacity planning for Q3 looks bad if we add another polling client.</li>
+          <li>14 customer complaints last quarter mention &ldquo;the feed feels stale&rdquo; or &ldquo;updates take forever&rdquo;.</li>
+          <li>Mobile clients drain noticeably more battery than competitors. Profile traces point at the 5s wake interval.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Constraints</h3>
+        <ul class="bullets">
+          <li>Ship within <strong>Q2</strong> (10 weeks).</li>
+          <li>Must support 50k concurrent connections at peak.</li>
+          <li>No new ops team &mdash; current platform team owns infra.</li>
+          <li>Reverse proxy is <strong>nginx</strong>, no L7 protocol awareness.</li>
+          <li>Mobile clients: iOS Safari 16+ and Android Chrome &mdash; both modern enough for SSE.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Options
+         ============================================================ -->
+    <section>
+      <h2>Options</h2>
+      <hr class="rule">
+
+      <div class="options">
+
+        <!-- Option A -->
+        <article class="option">
+          <div class="opt-head">
+            <h3><span class="letter">A</span>Tune the existing polling</h3>
+            <p>Keep HTTP polling, but cut the interval where it&rsquo;s wasteful and add long-poll fallback for active tabs.</p>
+          </div>
+          <div class="opt-badges">
+            <span class="badge effort-low">Effort <strong>1w</strong></span>
+            <span class="badge risk-low">Risk <strong>low</strong></span>
+          </div>
+          <div class="tradeoffs">
+            <div class="row head"><div class="cell">Pros</div><div class="cell">Cons</div></div>
+            <div class="row">
+              <div class="cell pro">Zero new infra; ships immediately</div>
+              <div class="cell con">Latency floor still ~3s</div>
+            </div>
+            <div class="row">
+              <div class="cell pro">Devs already understand the code path</div>
+              <div class="cell con">Doesn&rsquo;t scale past ~100k concurrent users</div>
+            </div>
+            <div class="row">
+              <div class="cell pro">Battery hit reduced 30&ndash;40% in early tests</div>
+              <div class="cell con">A stopgap &mdash; same problem returns in 12 months</div>
+            </div>
+          </div>
+          <div class="opt-timeline">
+            <strong>Timeline:</strong> PR open day 3, merged end of week 1
+          </div>
+        </article>
+
+        <!-- Option B (PICKED) -->
+        <article class="option picked">
+          <div class="opt-head">
+            <h3><span class="letter">B</span>Server-Sent Events (SSE)</h3>
+            <p>Server pushes JSON events over a long-lived HTTP response. Clients reconnect transparently.</p>
+          </div>
+          <div class="opt-badges">
+            <span class="badge effort-med">Effort <strong>3w</strong></span>
+            <span class="badge risk-med">Risk <strong>medium</strong></span>
+          </div>
+          <div class="tradeoffs">
+            <div class="row head"><div class="cell">Pros</div><div class="cell">Cons</div></div>
+            <div class="row">
+              <div class="cell pro">Sub-500ms push latency; solves the actual pain</div>
+              <div class="cell con">Sticky sessions needed &mdash; needs LB config change</div>
+            </div>
+            <div class="row">
+              <div class="cell pro">Plain HTTP &mdash; passes through nginx unchanged</div>
+              <div class="cell con">New failure mode (long-lived conns) for ops to learn</div>
+            </div>
+            <div class="row">
+              <div class="cell pro">Native browser <code style="font-family:var(--mono);font-size:12.5px">EventSource</code>, no client library</div>
+              <div class="cell con">Server-to-client only &mdash; no future bidirectional channel</div>
+            </div>
+          </div>
+          <div class="opt-timeline">
+            <strong>Timeline:</strong> wk 1 prototype, wk 2 hardening + flag, wk 3 rollout
+          </div>
+        </article>
+
+        <!-- Option C -->
+        <article class="option">
+          <div class="opt-head">
+            <h3><span class="letter">C</span>WebSockets</h3>
+            <p>Full bidirectional channel. Future-proofs the platform for chat, presence, and multiplayer features.</p>
+          </div>
+          <div class="opt-badges">
+            <span class="badge effort-high">Effort <strong>8w</strong></span>
+            <span class="badge risk-high">Risk <strong>high</strong></span>
+          </div>
+          <div class="tradeoffs">
+            <div class="row head"><div class="cell">Pros</div><div class="cell">Cons</div></div>
+            <div class="row">
+              <div class="cell pro">Sub-100ms latency, bidirectional</div>
+              <div class="cell con">Protocol upgrade through nginx needs new config + audit</div>
+            </div>
+            <div class="row">
+              <div class="cell pro">Foundation for chat / presence / multiplayer</div>
+              <div class="cell con">No product need today &mdash; pure capability investment</div>
+            </div>
+            <div class="row">
+              <div class="cell pro">Lower per-message overhead at large scale</div>
+              <div class="cell con">8 weeks is <strong>half of Q2</strong> &mdash; tight ship room</div>
+            </div>
+          </div>
+          <div class="opt-timeline">
+            <strong>Timeline:</strong> wk 1&ndash;2 design + library, wk 3&ndash;5 core build, wk 6&ndash;7 rollout, wk 8 soak
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Comparison matrix
+         ============================================================ -->
+    <section>
+      <h2>At a glance</h2>
+      <hr class="rule">
+
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>A &mdash; Tune polling</th>
+            <th class="picked-col">B &mdash; SSE</th>
+            <th>C &mdash; WebSockets</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="crit">Effort</td>
+            <td><span class="dot low"></span>1 week</td>
+            <td class="picked-col"><span class="dot med"></span>3 weeks</td>
+            <td><span class="dot high"></span>8 weeks</td>
+          </tr>
+          <tr>
+            <td class="crit">Risk</td>
+            <td><span class="dot low"></span>Low</td>
+            <td class="picked-col"><span class="dot med"></span>Medium</td>
+            <td><span class="dot high"></span>High</td>
+          </tr>
+          <tr>
+            <td class="crit">Push latency (p95)</td>
+            <td>~3 s</td>
+            <td class="picked-col">&lt; 500 ms</td>
+            <td>&lt; 100 ms</td>
+          </tr>
+          <tr>
+            <td class="crit">API CPU reduction</td>
+            <td>~30 %</td>
+            <td class="picked-col">~70 %</td>
+            <td>~75 %</td>
+          </tr>
+          <tr>
+            <td class="crit">Q2 ship room</td>
+            <td>Huge</td>
+            <td class="picked-col">Comfortable</td>
+            <td>Tight</td>
+          </tr>
+          <tr>
+            <td class="crit">Future bidirectional</td>
+            <td>No</td>
+            <td class="picked-col">No</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td class="crit">Solves the actual pain</td>
+            <td>Partly</td>
+            <td class="picked-col">Yes</td>
+            <td>Yes (overshoots)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================
+         Recommendation
+         ============================================================ -->
+    <section>
+      <aside class="reco">
+        <div class="reco-tag">Recommendation</div>
+        <h2>Ship <span class="pick">Option B &mdash; SSE</span></h2>
+        <p>
+          Polling has hit its ceiling for our scale &mdash; even after tuning,
+          we'd be back here in twelve months. WebSockets is the right
+          long-term answer <em>if</em> we add chat or multiplayer, but the
+          activity feed alone doesn't justify 8 weeks and the operational
+          surface area.
+        </p>
+        <p>
+          SSE is the smallest change that actually solves the user-visible
+          problem (perceived lag), cuts API CPU by ~70%, and leaves 7 weeks of
+          Q2 for follow-on work. If product later commits to chat, WebSockets
+          becomes a Q3 RFC with the activity feed already migrated to a push
+          model.
+        </p>
+        <p>
+          <strong>What changes if rejected:</strong> ship Option A as a 1-week
+          stopgap, but file the Q3 RFC immediately &mdash; we should not enter
+          Q4 still polling.
+        </p>
+      </aside>
+    </section>
+
+    <!-- ============================================================
+         Open questions
+         ============================================================ -->
+    <section>
+      <h2>Open questions</h2>
+      <hr class="rule">
+      <ul class="opens">
+        <li>
+          <strong>Does iOS Safari keep an SSE stream alive when the app is backgrounded on cellular?</strong>
+          The desktop spec says yes; mobile behavior is undocumented and the
+          two threads on Apple's forum disagree.
+          <span class="next">Next: 24-hour real-device test on iPhone 13 + iPhone 15, both carriers. Owner: M.O., due Apr 10.</span>
+        </li>
+        <li>
+          <strong>Does our nginx <code style="font-family:var(--mono);font-size:12.5px">ip_hash</code> sticky-session config survive the new pod autoscaler?</strong>
+          The autoscaler can recycle pods underneath a long-lived connection;
+          we need confirmation the proxy will reconnect cleanly.
+          <span class="next">Next: pair with Infra (Devon P.) on staging during the Apr 8 office hour.</span>
+        </li>
+        <li>
+          <strong>Is product planning to reuse the push channel for notifications?</strong>
+          If yes, capacity sizing doubles and we need to add per-user fan-out.
+          If no, the activity-feed-only channel is much simpler.
+          <span class="next">Next: 15-min sync with Sara (PM) before Apr 11.</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         Next steps
+         ============================================================ -->
+    <section>
+      <h2>Next steps</h2>
+      <hr class="rule">
+      <ol class="next-steps">
+        <li>
+          <strong>If accepted:</strong> M.O. opens an implementation plan in
+          <code>16-implementation-plan.html</code> by Apr 14. Two-week sprint kickoff
+          Apr 15, behind the <code>feed.realtime</code> flag.
+        </li>
+        <li>
+          <strong>During build:</strong> keep a running
+          <code>implementation-notes.html</code> (template 21) so design
+          decisions and deviations land in front of the reviewer, not in the
+          diff.
+        </li>
+        <li>
+          <strong>If rejected:</strong> ship Option A within 1 week as a
+          stopgap, and file the WebSockets RFC for Q3 planning by end of Apr.
+        </li>
+        <li>
+          <strong>Either way:</strong> resolve the three open questions above
+          by Apr 11 so decision-makers have the data they need.
+        </li>
+      </ol>
+    </section>
+
+    <footer>
+      <div class="row">
+        <span>SPIKE-042</span>
+        <span>spec <a href="#">PLATFORM-RFC-014</a></span>
+        <span>git <code style="font-family:var(--mono);font-size:11.5px">spike/realtime-feed</code></span>
+        <span>generated by Claude Code &middot; Apr 6 16:22</span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>
