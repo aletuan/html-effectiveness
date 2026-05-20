@@ -68,6 +68,16 @@ The templates are real, polished pages. The job is to produce something that loo
 - **Voice matches the artifact.** Status reports are matter-of-fact. Incident reports are blameless and chronological. PR reviews are direct and specific. Match the tone of the template, not just the visuals.
 - **Length matches the content, not the template.** If the template has 12 sections and the real work only justifies 4, ship 4 well-built sections. Don't pad to match the template's length.
 
+## Dark mode
+
+Artifacts default to **light**. Produce a dark version **only when the user explicitly asks** ("dark dashboard", "dark deck", a dark screenshot to match, etc.) — never pre-emptively. When they do:
+
+- Use the **Dark variant** token values from `references/design-tokens.md` in `:root` instead of the light ones. Token *names* stay identical, so the rest of the template's CSS is unchanged — it's a palette swap, not a redesign.
+- Add `color-scheme: dark;` to `:root` **and** `<meta name="color-scheme" content="dark">` in `<head>`. This declares the mode so the file is self-evident to a later reader, human or agent, without parsing CSS.
+- Keep everything else identical to the light version: same structure, 1.5px hairlines, radius, serif/sans/mono roles, sparing color.
+
+`reports/dark-palette-preview.html` is a rendered reference for the dark tokens in context.
+
 ## Print / PDF
 
 Document artifacts include the `@media print` block from `references/design-tokens.md`, so copying a document template's `<style>` carries print support automatically — the 10 document templates (03, 04, 11, 12, 14, 15, 16, 17, 21, 22) already have it. When generating, tag any screen-only chrome you add with `.no-print` (and pinned bars with `.no-print-sticky`). Editor (18–20) and prototype (07–08) templates do not get it — printing them is meaningless.
@@ -87,6 +97,7 @@ Before declaring the output done, verify:
 
 - [ ] One single `.html` file, self-contained (no external requests when opened).
 - [ ] Uses the shared palette tokens (`--ivory`, `--slate`, `--clay`, etc.) from `references/design-tokens.md`.
+- [ ] If the user asked for dark mode: `:root` sets `color-scheme: dark`, `<head>` has `<meta name="color-scheme" content="dark">`, and only Dark variant token values are used.
 - [ ] Uses the serif/sans/mono trio in their conventional roles (serif headings, sans body, mono for IDs/code/eyebrows).
 - [ ] Real content has replaced all placeholder names, IDs, dates, and figures.
 - [ ] Page renders correctly when opened directly in a browser (no missing fonts triggering layout shift — system fonts only).

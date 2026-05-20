@@ -28,6 +28,45 @@ Every template in `templates/` uses the same palette and type system. When gener
 }
 ```
 
+## Dark variant
+
+The gallery defaults to **light**. Dark mode is **generated on demand** — only when the user explicitly asks for it ("dark dashboard", "dark slide deck", etc.). It is *not* baked into the gallery files, and there is no `prefers-color-scheme` auto-switching. Token **names stay identical**; only the values change, so every structural rule (hairline widths, radius, serif/sans/mono roles) carries over untouched.
+
+When producing a dark artifact:
+
+1. Use the dark token values below in `:root` instead of the light ones.
+2. Add `color-scheme: dark;` to `:root` **and** `<meta name="color-scheme" content="dark">` in `<head>`. This self-declares the mode, so a later reader — human or agent — knows which mode the file is in without parsing CSS.
+3. Keep everything else identical to the light version: same structure, same 1.5px hairlines, same sparing use of color.
+
+```css
+:root {
+  color-scheme: dark;
+
+  /* Surfaces — warm dark, not pure black */
+  --ivory:    #1A1916;  /* page background  (light: #FAF9F5) */
+  --paper:    #24221E;  /* cards, panels    (light: #FFFFFF) */
+  --oat:      #3A352D;  /* subtle fills     (light: #E3DACC) */
+
+  /* Text — warm off-white, not pure white */
+  --slate:    #ECEAE3;  /* primary text     (light: #141413) */
+  --gray-700: #C9C6BD;  /* body text        (light: #3D3D3A) */
+  --gray-500: #9C988D;  /* secondary / meta (light: #87867F) */
+  --gray-300: #3D3A33;  /* borders          (light: #D1CFC5) */
+  --gray-200: #332F29;  /* dividers         (light: #E6E3DA) */
+  --gray-150: #211F1B;  /* hover, stripes   (light: #F0EEE6) */
+  --gray-100: #211F1B;  /* alias            (light: #F0EEE6) */
+  --white:    #24221E;  /* alias → paper    (light: #FFFFFF) */
+
+  /* Accents — same hue, lifted ~12% for contrast on dark */
+  --clay:     #E08A6B;  /* accent, links    (light: #D97757) */
+  --clay-d:   #C9714F;  /* clay pressed     (light: #B85C3E) */
+  --olive:    #9DB07E;  /* success, +       (light: #788C5D) */
+  --rust:     #CE6B5B;  /* danger, −        (light: #B04A3F) */
+}
+```
+
+For diff tints on dark, use the accent at low alpha — `rgba(157,176,126,0.16)` for additions, `rgba(206,107,91,0.16)` for deletions — rather than the flat light-mode fills. A rendered reference lives at `reports/dark-palette-preview.html`.
+
 ## Typography
 
 ```css
@@ -110,4 +149,4 @@ When integrating into a template: drop the block in verbatim, then (1) append th
 
 ## When the user wants a different palette
 
-If the user explicitly asks for "dark mode", "their brand colors", "blue theme", etc., adapt the tokens but **keep the structural rules** (hairline widths, border-radius, serif/sans/mono roles, layout density). The look-and-feel comes from the system, not just the colors.
+If the user explicitly asks for **dark mode**, use the canonical [Dark variant](#dark-variant) token set above — don't improvise new dark values. For other palette requests ("their brand colors", "blue theme", etc.), adapt the tokens but **keep the structural rules** (hairline widths, border-radius, serif/sans/mono roles, layout density). The look-and-feel comes from the system, not just the colors.
