@@ -34,10 +34,13 @@ The templates live in `templates/` next to this file. They are full, populated e
 | Feature flag editor / config UI | `19-editor-feature-flags.html` |
 | Prompt-tuning / LLM-evaluation editor | `20-editor-prompt-tuner.html` |
 | **Implementation notes — running log of decisions, deviations, tradeoffs, and open questions captured while implementing a spec** | `21-implementation-notes.html` |
+| **Spike report — investigation of tech debt or a new feature, comparing 2–4 options with effort estimates, timeline, and a recommendation** | `22-spike-report.html` |
 
 If the request straddles two categories, pick the one whose **structure** matches best, not the one whose subject matter matches. A "code review of PR #312" is a code review (03), even if it's about a frontend feature. A "writeup of PR #312 I just merged" is a PR writeup (17). Code review = feedback before merge; PR writeup = explaining a finished change.
 
-The spec-implementation triplet is similar: **implementation plan (16)** is written *before* code as a design doc with mockups; **implementation notes (21)** are kept *during* the build as a running log of decisions/tradeoffs/open questions; **PR writeup (17)** explains what shipped *after* the work is done. If the user says "implement X and keep a running log of decisions" → 21. If they say "plan how we'd build X" → 16. If they say "write up what we just merged" → 17.
+The spec-implementation chain has four stages: **spike (22)** is the *investigation* — comparing options, estimating effort, and arriving at a recommendation, written *before* a direction has been chosen; **implementation plan (16)** is the design doc with mockups, written once a direction is picked but *before* code; **implementation notes (21)** are kept *during* the build as a running log of decisions/tradeoffs/open questions; **PR writeup (17)** explains what shipped *after*. If the user says "investigate how we should X" or "compare options for X with effort estimates" → 22. If they say "plan how we'd build X" → 16. If they say "implement X and keep a running log of decisions" → 21. If they say "write up what we just merged" → 17.
+
+Note that 22 *converges* (here's what I recommend) while `01-exploration-code-approaches` *diverges* (here are options to react to, no verdict). If the user wants a recommendation, effort estimate, or timeline, pick 22 — not 01.
 
 If nothing fits well, pick the closest structural match and adapt — don't force a poor fit. Common adaptation: `11-status-report.html` is a strong fallback for any "summary of recent work" artifact.
 
