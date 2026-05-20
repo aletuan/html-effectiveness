@@ -82,6 +82,23 @@
   .intro a { color: var(--clay); text-decoration-color: var(--oat); text-underline-offset: 3px; }
   .intro a:hover { text-decoration-color: var(--clay); }
 
+  .note {
+    font-size: 14px;
+    color: var(--g700);
+    margin: 18px 0 0;
+    max-width: 620px;
+    padding-left: 14px;
+    border-left: 2px solid var(--clay);
+  }
+  .note strong { color: var(--slate); font-weight: 600; }
+  .note code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: var(--g100);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
   .hero-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
@@ -347,12 +364,18 @@
         <div class="eyebrow">Companion to the blog post</div>
         <h1>The unreasonable <em>effectiveness</em> of HTML</h1>
         <p class="intro">
-          Twenty self-contained <code>.html</code> files an agent produced instead of a wall of markdown.
+          Twenty-two self-contained <code>.html</code> files an agent produced instead of a wall of markdown.
           Each one trades a document you'd skim for one you'd actually read — open any of them directly in
           a browser. Grouped by the kind of work they replace.
         </p>
+        <p class="note">
+          <strong>Print &amp; dark mode.</strong> The document templates ship with a print stylesheet, so
+          you can save any of them as a PDF (<code>⌘/Ctrl-P</code>) and get a clean page — white background,
+          colors kept, no cards split across page breaks. Dark mode is available too: the design tokens
+          carry a warm dark palette Claude can render any document in on request.
+        </p>
         <nav class="toc">
-          <a href="#exploration">Exploration &amp; Planning <span class="n">3</span></a>
+          <a href="#exploration">Exploration &amp; Planning <span class="n">5</span></a>
           <a href="#code-review">Code Review <span class="n">3</span></a>
           <a href="#design">Design <span class="n">2</span></a>
           <a href="#prototyping">Prototyping <span class="n">2</span></a>
