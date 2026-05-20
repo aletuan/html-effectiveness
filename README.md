@@ -141,6 +141,15 @@ from anywhere, copy the folder to your user skills directory:
 cp -r .claude/skills/html-output ~/.claude/skills/
 ```
 
+## Generated reports
+
+When the skill is used to produce output *about this repo* (a structure
+walkthrough, a deck, a usage flowchart), those files live in
+[`reports/`](reports/) — not the root. The root stays the canonical gallery
+(`index.html` plus the numbered templates). In your own projects the skill
+writes to your working directory as usual; `reports/` is just housekeeping for
+this gallery repo.
+
 ## A note on sample data
 
 All product names, data, and scenarios in these examples are fictional and used
