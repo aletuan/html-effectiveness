@@ -1,0 +1,343 @@
+<!-- Copyright 2026 Anthropic PBC · SPDX-License-Identifier: Apache-2.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Dark palette preview — html-effectiveness</title>
+<style>
+  :root {
+    color-scheme: dark;
+
+    /* Surfaces — warm dark, not pure black */
+    --ivory:    #1A1916;  /* page background  (was #FAF9F5) */
+    --paper:    #24221E;  /* cards, panels    (was #FFFFFF) */
+    --oat:      #3A352D;  /* subtle fills     (was #E3DACC) */
+
+    /* Text — warm off-white, not pure white */
+    --slate:    #ECEAE3;  /* primary text     (was #141413) */
+    --gray-700: #C9C6BD;  /* body text        (was #3D3D3A) */
+    --gray-500: #9C988D;  /* secondary / meta (was #87867F) */
+    --gray-300: #3D3A33;  /* borders          (was #D1CFC5) */
+    --gray-200: #332F29;  /* dividers         (was #E6E3DA) */
+    --gray-150: #211F1B;  /* hover, stripes   (was #F0EEE6) */
+    --gray-100: #211F1B;  /* alias            (was #F0EEE6) */
+    --white:    #24222E;  /* (alias→paper)    (was #FFFFFF) */
+
+    /* Accents — same hue, lifted ~12% for contrast on dark */
+    --clay:     #E08A6B;  /* accent, links    (was #D97757) */
+    --clay-d:   #C9714F;  /* clay pressed     (was #B85C3E) */
+    --olive:    #9DB07E;  /* success / +      (was #788C5D) */
+    --rust:     #CE6B5B;  /* danger / −       (was #B04A3F) */
+
+    --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+    --radius-panel: 12px;
+    --radius-row: 8px;
+    --border: 1.5px solid var(--gray-300);
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--ivory); }
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--gray-700);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--clay);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+    color: var(--slate);
+    margin: 0 0 10px;
+  }
+  .lead { max-width: 64ch; margin: 0 0 8px; color: var(--gray-700); }
+  .lead.muted { color: var(--gray-500); font-size: 14.5px; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 21px;
+    color: var(--slate);
+    margin: 52px 0 6px;
+  }
+  .sub {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--gray-500);
+    margin: 0 0 22px;
+  }
+
+  hr { border: 0; border-top: var(--border); margin: 40px 0 0; }
+
+  /* ── Swatch grid ─────────────────────────────────────── */
+  .group-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--gray-500);
+    margin: 28px 0 12px;
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(186px, 1fr));
+    gap: 14px;
+  }
+  .swatch {
+    border: var(--border);
+    border-radius: var(--radius-panel);
+    overflow: hidden;
+    background: var(--paper);
+  }
+  .chip { height: 64px; border-bottom: var(--border); }
+  .swatch .meta { padding: 11px 13px 13px; }
+  .swatch .name {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--slate);
+    margin: 0 0 3px;
+  }
+  .swatch .hex {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gray-700);
+    margin: 0;
+  }
+  .swatch .was {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    margin: 4px 0 0;
+  }
+  .swatch .role {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin: 6px 0 0;
+    line-height: 1.4;
+  }
+  /* text-color swatches render a glyph instead of a flat fill */
+  .chip.glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ivory);
+  }
+  .chip.glyph span {
+    font-family: var(--serif);
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  /* ── In-context mock card ────────────────────────────── */
+  .card {
+    border: var(--border);
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    padding: 26px 28px;
+    margin-top: 8px;
+  }
+  .card .repo {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gray-500);
+    margin: 0 0 8px;
+  }
+  .card h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--slate);
+    margin: 0 0 12px;
+  }
+  .card p { margin: 0 0 14px; }
+  .chiprow { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 0; }
+  .tag {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: var(--border);
+    color: var(--gray-700);
+    background: var(--gray-150);
+  }
+  .tag.accent { color: var(--clay); border-color: var(--clay); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: middle; }
+  .dot.ok { background: var(--olive); }
+  .dot.warn { background: var(--rust); }
+
+  /* diff block */
+  .diff {
+    font-family: var(--mono);
+    font-size: 13px;
+    border: var(--border);
+    border-radius: var(--radius-row);
+    overflow: hidden;
+    margin: 16px 0 0;
+  }
+  .diff .ln { padding: 3px 14px; white-space: pre; }
+  .diff .add { background: rgba(157,176,126,0.16); color: var(--olive); }
+  .diff .del { background: rgba(206,107,91,0.16); color: var(--rust); }
+  .diff .ctx { color: var(--gray-500); }
+
+  /* mini table */
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: var(--border); }
+  th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); font-weight: 400; }
+  tbody tr:nth-child(even) { background: var(--gray-150); }
+  td.num { font-family: var(--mono); color: var(--gray-700); }
+
+  a { color: var(--clay); }
+
+  .note {
+    border-left: 2px solid var(--clay);
+    padding: 4px 0 4px 16px;
+    margin: 22px 0 0;
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Dark palette preview · html-effectiveness</p>
+  <h1>Dark mode palette — candidate values</h1>
+  <p class="lead">A warm dark counterpart to the gallery's ivory/clay/oat system. Token names stay identical; only the <em>values</em> change. Surfaces are warm near-black (not pure black), text is warm off-white (not pure white), accents keep their hue but are lifted ~12% for contrast.</p>
+  <p class="lead muted">This file is itself rendered with the candidate tokens and declares <code>&lt;meta name="color-scheme" content="dark"&gt;</code> — the same self-declaration convention a generated dark artifact would carry. Review the swatches, then the "in context" card below to judge the colors working together.</p>
+
+  <hr>
+
+  <h2>Swatches</h2>
+  <p class="sub">each chip shows the dark value · "was" = the light token it replaces</p>
+
+  <p class="group-label">Surfaces</p>
+  <div class="swatches">
+    <div class="swatch">
+      <div class="chip" style="background:#1A1916"></div>
+      <div class="meta"><p class="name">--ivory</p><p class="hex">#1A1916</p><p class="was">was #FAF9F5</p><p class="role">page background</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#24221E"></div>
+      <div class="meta"><p class="name">--paper</p><p class="hex">#24221E</p><p class="was">was #FFFFFF</p><p class="role">cards, panels</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#3A352D"></div>
+      <div class="meta"><p class="name">--oat</p><p class="hex">#3A352D</p><p class="was">was #E3DACC</p><p class="role">subtle fills, avatars</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#211F1B"></div>
+      <div class="meta"><p class="name">--gray-150</p><p class="hex">#211F1B</p><p class="was">was #F0EEE6</p><p class="role">hover, table stripes</p></div>
+    </div>
+  </div>
+
+  <p class="group-label">Text</p>
+  <div class="swatches">
+    <div class="swatch">
+      <div class="chip glyph"><span style="color:#ECEAE3">Aa</span></div>
+      <div class="meta"><p class="name">--slate</p><p class="hex">#ECEAE3</p><p class="was">was #141413</p><p class="role">primary text, headings</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip glyph"><span style="color:#C9C6BD">Aa</span></div>
+      <div class="meta"><p class="name">--gray-700</p><p class="hex">#C9C6BD</p><p class="was">was #3D3D3A</p><p class="role">body text</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip glyph"><span style="color:#9C988D">Aa</span></div>
+      <div class="meta"><p class="name">--gray-500</p><p class="hex">#9C988D</p><p class="was">was #87867F</p><p class="role">secondary / meta</p></div>
+    </div>
+  </div>
+
+  <p class="group-label">Borders &amp; dividers</p>
+  <div class="swatches">
+    <div class="swatch">
+      <div class="chip" style="background:#3D3A33"></div>
+      <div class="meta"><p class="name">--gray-300</p><p class="hex">#3D3A33</p><p class="was">was #D1CFC5</p><p class="role">card borders (1.5px)</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#332F29"></div>
+      <div class="meta"><p class="name">--gray-200</p><p class="hex">#332F29</p><p class="was">was #E6E3DA</p><p class="role">light dividers</p></div>
+    </div>
+  </div>
+
+  <p class="group-label">Accents</p>
+  <div class="swatches">
+    <div class="swatch">
+      <div class="chip" style="background:#E08A6B"></div>
+      <div class="meta"><p class="name">--clay</p><p class="hex">#E08A6B</p><p class="was">was #D97757</p><p class="role">primary accent, links, eyebrows</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#C9714F"></div>
+      <div class="meta"><p class="name">--clay-d</p><p class="hex">#C9714F</p><p class="was">was #B85C3E</p><p class="role">clay pressed</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#9DB07E"></div>
+      <div class="meta"><p class="name">--olive</p><p class="hex">#9DB07E</p><p class="was">was #788C5D</p><p class="role">success, additions (+)</p></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#CE6B5B"></div>
+      <div class="meta"><p class="name">--rust</p><p class="hex">#CE6B5B</p><p class="was">was #B04A3F</p><p class="role">warning, deletions (−)</p></div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>In context</h2>
+  <p class="sub">the candidate tokens working together — eyebrow, serif title, body, tags, diff, table</p>
+
+  <div class="card">
+    <p class="repo">acme/checkout · feature/backpressure-guard</p>
+    <h3>Add backpressure guard to the streaming writer</h3>
+    <p>The writer now stops pulling from the upstream queue once the socket's high-water mark is reached, instead of buffering unboundedly. Body text sits at <code>--gray-700</code> on a <code>--paper</code> card; the hairline border is the lifted <code>--gray-300</code>.</p>
+    <div class="chiprow">
+      <span class="tag accent">streaming</span>
+      <span class="tag">+128 −41</span>
+      <span class="tag"><span class="dot ok"></span>tests passing</span>
+      <span class="tag"><span class="dot warn"></span>1 open question</span>
+    </div>
+
+    <div class="diff">
+      <div class="ln ctx">  async function flush(chunk) {</div>
+      <div class="ln del">-   queue.push(chunk);</div>
+      <div class="ln add">+   if (socket.bufferedAmount &gt; HIGH_WATER) await drain(socket);</div>
+      <div class="ln add">+   queue.push(chunk);</div>
+      <div class="ln ctx">  }</div>
+    </div>
+
+    <table>
+      <thead><tr><th>Metric</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td>Peak heap</td><td class="num">512 MB</td><td class="num">88 MB</td></tr>
+        <tr><td>p99 latency</td><td class="num">340 ms</td><td class="num">210 ms</td></tr>
+        <tr><td>Dropped frames</td><td class="num">1,204</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+
+    <p class="note">Links render in clay: see <a href="#">PR #312</a>. A single olive dot or clay underline still carries the accent — color stays sparse, exactly like the light gallery.</p>
+  </div>
+
+  <hr>
+
+  <p class="lead muted" style="margin-top:32px">Sample data is fictional (Acme). If these values look right, I'll lock them into <code>references/design-tokens.md</code> as the "Dark variant" set and write the spec. Tell me anything that feels off — too dark, low contrast, an accent that reads wrong — and I'll adjust before locking.</p>
+
+</div>
+</body>
+</html>
