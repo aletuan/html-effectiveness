@@ -24,17 +24,22 @@ The repo has two halves that share content on purpose:
 ```
 html-effectiveness/
 ├── index.html                          # categorized gallery — entry point
-├── 01-…-20-*.html                      # the 20 self-contained example artifacts
+├── 01-…-22-*.html                      # the 22 self-contained example artifacts
+├── reports/                            # skill output generated ABOUT this repo
 ├── README.md / LICENSE / SECURITY.md
 └── .claude/skills/html-output/
     ├── SKILL.md                        # template-picker table + workflow
-    ├── templates/                      # COPIES of the 20 numbered files
+    ├── templates/                      # COPIES of the 22 numbered files
     └── references/design-tokens.md     # shared palette + typography
 ```
 
 - The **top-level numbered files** are the human-facing gallery, linked from `index.html`.
 - The **`templates/` copies** are what the `html-output` skill reads when Claude generates a new artifact.
 - These two sets are duplicated **by design**. If you edit a numbered file at the top level, mirror the change to `.claude/skills/html-output/templates/` (or vice versa) — drift between them will degrade the skill silently.
+
+### Where generated output goes
+
+When the skill is run to produce output **about this repo** (a walkthrough, a deck, a status report on the gallery itself), write it to **`reports/`** — never the root. The root is the canonical gallery only; an unnumbered `.html` sitting next to `01-22-*.html` reads like a stray 23rd template. This is a convention for *this* repo specifically — it is deliberately **not** in `SKILL.md`, because in a normal project the skill writes to the working directory (where the user wants the deliverable), not a forced subfolder.
 
 ## Hard rules for every `.html` file
 
