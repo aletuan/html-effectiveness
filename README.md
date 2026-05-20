@@ -125,6 +125,25 @@ flows back to Claude Code or a file you can commit.
 There is nothing to install or build. Clone the repo and open `index.html` (or
 any individual file) in a web browser.
 
+## Dark mode and print
+
+The ten document-style templates — code review, code walkthrough, status
+report, incident report, implementation plan, PR write-up, implementation
+notes, spike report, and the feature/concept explainers — carry a print
+stylesheet. **Save as PDF** then gives a clean page: white background, on-screen
+colors kept (diff, severity, accents), interactive chrome dropped, and cards or
+tables that don't split across page breaks. Just open the file and print. (The
+editor and prototype templates skip it — printing them isn't meaningful.)
+
+**Dark mode** is produced on demand: ask the skill for a dark version and it
+swaps in the warm-dark palette from
+[`design-tokens.md`](.claude/skills/html-output/references/design-tokens.md),
+keeps every structural rule, and self-declares the mode with
+`<meta name="color-scheme">`. The gallery itself stays light.
+
+Rendered references for both live in [`reports/`](reports/) —
+`dark-palette-preview.html` and `print-preview-status-report.html`.
+
 ## Using these templates as a Claude Code skill
 
 This repo also ships a [Claude Code](https://claude.com/claude-code) skill at
