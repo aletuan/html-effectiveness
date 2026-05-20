@@ -78,6 +78,10 @@ Artifacts default to **light**. Produce a dark version **only when the user expl
 
 `reports/dark-palette-preview.html` is a rendered reference for the dark tokens in context.
 
+## Print / PDF
+
+Document artifacts include the `@media print` block from `references/design-tokens.md`, so copying a document template's `<style>` carries print support automatically — the 10 document templates (03, 04, 11, 12, 14, 15, 16, 17, 21, 22) already have it. When generating, tag any screen-only chrome you add with `.no-print` (and pinned bars with `.no-print-sticky`). Editor (18–20) and prototype (07–08) templates do not get it — printing them is meaningless.
+
 ## When the user wants something the templates don't cover
 
 If the user asks for an artifact type that isn't in the table (e.g., a job posting, a recipe, a contract summary):
@@ -98,3 +102,4 @@ Before declaring the output done, verify:
 - [ ] Real content has replaced all placeholder names, IDs, dates, and figures.
 - [ ] Page renders correctly when opened directly in a browser (no missing fonts triggering layout shift — system fonts only).
 - [ ] Filename is descriptive of the artifact, not generic.
+- [ ] For a document artifact: the @media print block is present and any screen-only chrome is tagged .no-print.

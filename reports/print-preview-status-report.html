@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Acme — Engineering Status — Week 11</title>
+<title>Print preview — Engineering Status (Week 11)</title>
 <style>
   :root {
     --ivory: #FAF9F5;
@@ -32,7 +32,7 @@
 
   body {
     margin: 0;
-    padding: 56px 24px 120px;
+    padding: 0 24px 120px;
     background: var(--ivory);
     color: var(--slate);
     font-family: var(--sans);
@@ -46,10 +46,70 @@
     margin: 0 auto;
   }
 
-  /* ---------- Header ---------- */
-  header {
-    margin-bottom: 40px;
+  /* ---------- Demo chrome (hidden in print) ---------- */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 860px;
+    margin: 0 auto 4px;
+    padding: 12px 0;
+    background: var(--ivory);
+    border-bottom: var(--border);
   }
+  .toolbar .tb-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+  }
+  .toolbar .tb-actions { display: flex; gap: 8px; }
+  .toolbar button {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--slate);
+    background: var(--white);
+    border: var(--border);
+    border-radius: 7px;
+    padding: 6px 13px;
+    cursor: pointer;
+  }
+  .toolbar button.primary {
+    color: var(--white);
+    background: var(--clay);
+    border-color: var(--clay);
+  }
+
+  .preview-banner {
+    border: 1.5px dashed var(--clay);
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    padding: 16px 20px;
+    margin: 18px auto 36px;
+    max-width: 860px;
+    font-size: 13.5px;
+    color: var(--gray-700);
+  }
+  .preview-banner strong { color: var(--slate); }
+  .preview-banner .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--clay);
+    display: block;
+    margin-bottom: 7px;
+  }
+  .preview-banner ul { margin: 9px 0 0; padding-left: 18px; }
+  .preview-banner li { margin-bottom: 3px; }
+
+  /* ---------- Header ---------- */
+  header { margin-bottom: 40px; }
   .header-top {
     display: flex;
     align-items: baseline;
@@ -77,10 +137,7 @@
     padding: 5px 11px;
     white-space: nowrap;
   }
-  .date-range {
-    color: var(--gray-500);
-    font-size: 14px;
-  }
+  .date-range { color: var(--gray-500); font-size: 14px; }
   .date-range .repo {
     font-family: var(--mono);
     font-size: 13px;
@@ -88,9 +145,7 @@
   }
 
   /* ---------- Sections ---------- */
-  section {
-    margin-bottom: 52px;
-  }
+  section { margin-bottom: 52px; }
   h2 {
     font-family: var(--serif);
     font-weight: 500;
@@ -119,10 +174,7 @@
     border-radius: var(--radius-panel);
     padding: 20px 22px 18px;
   }
-  .stat-card.warn {
-    border-left: 4px solid var(--clay);
-    padding-left: 19px;
-  }
+  .stat-card.warn { border-left: 4px solid var(--clay); padding-left: 19px; }
   .stat-num {
     font-family: var(--serif);
     font-size: 44px;
@@ -138,20 +190,12 @@
     letter-spacing: 0.05em;
     color: var(--gray-500);
   }
-  .stat-delta {
-    font-family: var(--mono);
-    font-size: 11px;
-    margin-top: 6px;
-  }
+  .stat-delta { font-family: var(--mono); font-size: 11px; margin-top: 6px; }
   .stat-delta.up { color: var(--olive); }
   .stat-delta.flat { color: var(--gray-500); }
 
   /* ---------- Highlights ---------- */
-  .highlights {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
+  .highlights { list-style: none; margin: 0; padding: 0; }
   .highlights li {
     position: relative;
     padding: 0 0 14px 26px;
@@ -168,10 +212,8 @@
     border-radius: 2px;
     background: var(--clay);
   }
-  .highlights li strong {
-    color: var(--slate);
-    font-weight: 600;
-  }
+  .highlights li strong { color: var(--slate); font-weight: 600; }
+  .highlights a { color: var(--clay); }
 
   /* ---------- Shipped table ---------- */
   table.shipped {
@@ -201,12 +243,8 @@
     font-size: 14px;
     vertical-align: middle;
   }
-  table.shipped tbody tr:last-child td {
-    border-bottom: none;
-  }
-  table.shipped tbody tr:hover {
-    background: var(--ivory);
-  }
+  table.shipped tbody tr:last-child td { border-bottom: none; }
+  table.shipped tbody tr:hover { background: var(--ivory); }
   .pr-link {
     font-family: var(--mono);
     font-size: 13px;
@@ -214,13 +252,8 @@
     text-decoration: none;
     border-bottom: 1px dotted transparent;
   }
-  .pr-link:hover {
-    border-bottom-color: var(--clay);
-  }
-  .author {
-    color: var(--gray-700);
-    font-size: 13px;
-  }
+  .pr-link:hover { border-bottom-color: var(--clay); }
+  .author { color: var(--gray-700); font-size: 13px; }
   .risk {
     display: inline-flex;
     align-items: center;
@@ -228,12 +261,7 @@
     font-size: 12px;
     color: var(--gray-500);
   }
-  .risk-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .risk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
   .risk-dot.low { background: var(--olive); }
   .risk-dot.med { background: var(--clay); }
   .risk-dot.high { background: var(--rust); }
@@ -245,32 +273,13 @@
     border-radius: var(--radius-panel);
     padding: 24px 28px 18px;
   }
-  .chart-panel svg {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .chart-caption {
-    font-size: 12px;
-    color: var(--gray-500);
-    margin-top: 12px;
-  }
+  .chart-panel svg { display: block; width: 100%; height: auto; }
+  .chart-caption { font-size: 12px; color: var(--gray-500); margin-top: 12px; }
 
   /* ---------- Carryover ---------- */
-  .carryover {
-    background: var(--oat);
-    border-radius: var(--radius-panel);
-    padding: 20px 22px;
-  }
-  .carry-item {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    padding: 8px 0;
-  }
-  .carry-item + .carry-item {
-    border-top: 1px solid rgba(20, 20, 19, 0.08);
-  }
+  .carryover { background: var(--oat); border-radius: var(--radius-panel); padding: 20px 22px; }
+  .carry-item { display: flex; align-items: baseline; gap: 14px; padding: 8px 0; }
+  .carry-item + .carry-item { border-top: 1px solid rgba(20, 20, 19, 0.08); }
   .carry-tag {
     font-family: var(--mono);
     font-size: 11px;
@@ -282,14 +291,8 @@
     padding: 3px 7px;
     flex-shrink: 0;
   }
-  .carry-body {
-    font-size: 14px;
-    color: var(--gray-700);
-  }
-  .carry-body .who {
-    color: var(--gray-500);
-    font-size: 12px;
-  }
+  .carry-body { font-size: 14px; color: var(--gray-700); }
+  .carry-body .who { color: var(--gray-500); font-size: 12px; }
 
   /* ---------- Footer ---------- */
   footer {
@@ -300,11 +303,20 @@
     font-size: 12px;
     color: var(--gray-500);
   }
+  footer a { color: var(--gray-700); }
 
+  /* ============================================================
+     CANDIDATE PRINT BLOCK  (the design under review)
+     Universal rules = the shared canonical block.
+     File-specific = the card selectors + body/.page reset added
+     when baking into this particular template.
+     ============================================================ */
   @media print {
     /* keep on-screen color; only the page itself goes white */
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     html, body { background: #fff; }
+    body { padding: 0; }
+    .page { max-width: none; margin: 0; }
 
     @page { margin: 16mm 14mm; }
 
@@ -313,10 +325,12 @@
     button { display: none !important; }
     .no-print-sticky { position: static !important; }
 
-    /* don't split atomic blocks across pages — APPEND this file's own
-       card/panel class to the selector list on the next line */
-    table, tr, thead, figure, pre, blockquote, svg, .stat-card, .chart-panel, .carryover { break-inside: avoid; }
+    /* don't split atomic blocks across pages
+       (universal elements + this file's card classes) */
+    table, tr, thead, figure, pre, blockquote, svg,
+    .stat-card, .chart-panel, .carryover, .carry-item { break-inside: avoid; }
     h1, h2, h3 { break-after: avoid; }
+    section { margin-bottom: 24px; }
     p, li { orphans: 3; widows: 3; }
 
     /* show destination of external links (paper can't be clicked) */
@@ -326,14 +340,34 @@
       color: var(--gray-500);
       word-break: break-all;
     }
-
-    body { padding: 0; }
-    .page { max-width: none; margin: 0; }
   }
 </style>
 </head>
 <body>
+
+  <!-- Sticky UI bar — tagged .no-print, vanishes when printed -->
+  <div class="toolbar no-print">
+    <span class="tb-title">Print preview · status report</span>
+    <div class="tb-actions">
+      <button>Filter</button>
+      <button class="primary" onclick="window.print()">Save as PDF</button>
+    </div>
+  </div>
+
   <div class="page">
+
+    <!-- Explainer — also .no-print -->
+    <div class="preview-banner no-print">
+      <span class="eyebrow">Print preview — phase 2</span>
+      Press <strong>Cmd/Ctrl-P</strong> (or the “Save as PDF” button) to see the print layout.
+      What changes when printed:
+      <ul>
+        <li>This banner and the sticky toolbar above <strong>disappear</strong> (<code>.no-print</code> / <code>button</code>).</li>
+        <li>The page background drops to <strong>white</strong>; diff/severity/accent <strong>colors are kept</strong>.</li>
+        <li>Stat cards, the shipped table, the chart, and carryover <strong>won't split</strong> across pages.</li>
+        <li>External links show their <strong>URL in parentheses</strong> — see the postmortem link and the footer.</li>
+      </ul>
+    </div>
 
     <header>
       <div class="header-top">
@@ -390,7 +424,7 @@
         <li>
           <strong>One SEV-2 on Wednesday</strong> &mdash; a config rollout pushed
           a bad connection-pool limit to the sync workers. Mitigated in 47 minutes;
-          full postmortem linked below.
+          <a href="https://acme.example.com/postmortems/2025-03-12-sync-sev2">full postmortem here</a>.
         </li>
       </ul>
     </section>
@@ -467,36 +501,21 @@
       <hr class="rule">
       <div class="chart-panel">
         <svg viewBox="0 0 640 180" role="img" aria-label="PRs merged per day">
-          <!-- gridlines -->
           <line x1="48" y1="20"  x2="620" y2="20"  stroke="#F0EEE6" stroke-width="1"/>
           <line x1="48" y1="60"  x2="620" y2="60"  stroke="#F0EEE6" stroke-width="1"/>
           <line x1="48" y1="100" x2="620" y2="100" stroke="#F0EEE6" stroke-width="1"/>
           <line x1="48" y1="140" x2="620" y2="140" stroke="#D1CFC5" stroke-width="1.5"/>
-
-          <!-- y-axis labels -->
           <text x="40" y="144" text-anchor="end" font-family="system-ui" font-size="11" fill="#87867F">0</text>
           <text x="40" y="104" text-anchor="end" font-family="system-ui" font-size="11" fill="#87867F">1</text>
           <text x="40" y="64"  text-anchor="end" font-family="system-ui" font-size="11" fill="#87867F">2</text>
           <text x="40" y="24"  text-anchor="end" font-family="system-ui" font-size="11" fill="#87867F">3</text>
-
-          <!-- bars: 7 days, values 2,3,1,4,2,1,1 (sum 14)
-               baseline y=140, unit=40px, bar width=56, gap=24, start x=64 -->
-          <!-- Mon: 2 -->
           <rect x="64"  y="60"  width="56" height="80"  rx="6" fill="#E3DACC"/>
-          <!-- Tue: 3 -->
           <rect x="144" y="20"  width="56" height="120" rx="6" fill="#E3DACC"/>
-          <!-- Wed: 1 -->
           <rect x="224" y="100" width="56" height="40"  rx="6" fill="#E3DACC"/>
-          <!-- Thu: 4 (peak) -->
           <rect x="304" y="0"   width="56" height="140" rx="6" fill="#D97757"/>
-          <!-- Fri: 2 -->
           <rect x="384" y="60"  width="56" height="80"  rx="6" fill="#E3DACC"/>
-          <!-- Sat: 1 -->
           <rect x="464" y="100" width="56" height="40"  rx="6" fill="#E3DACC"/>
-          <!-- Sun: 1 -->
           <rect x="544" y="100" width="56" height="40"  rx="6" fill="#E3DACC"/>
-
-          <!-- value labels -->
           <text x="92"  y="54"  text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">2</text>
           <text x="172" y="14"  text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">3</text>
           <text x="252" y="94"  text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">1</text>
@@ -504,8 +523,6 @@
           <text x="412" y="54"  text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">2</text>
           <text x="492" y="94"  text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">1</text>
           <text x="572" y="94"  text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">1</text>
-
-          <!-- x-axis labels -->
           <text x="92"  y="158" text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">Mon</text>
           <text x="172" y="158" text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">Tue</text>
           <text x="252" y="158" text-anchor="middle" font-family="system-ui" font-size="11" fill="#87867F">Wed</text>
@@ -550,7 +567,8 @@
     </section>
 
     <footer>
-      Sources: git log main..HEAD &middot; CI dashboard &middot; deploy log
+      Sources: git log main..HEAD &middot;
+      <a href="https://acme.example.com/ci/dashboard">CI dashboard</a> &middot; deploy log
       &nbsp;&mdash;&nbsp; generated Mar 16 2025 18:02
     </footer>
 

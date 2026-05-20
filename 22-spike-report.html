@@ -475,6 +475,36 @@
       border-bottom: 1px dotted transparent;
     }
     footer a:hover { border-bottom-color: var(--clay); }
+
+    @media print {
+      /* keep on-screen color; only the page itself goes white */
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      html, body { background: #fff; }
+
+      @page { margin: 16mm 14mm; }
+
+      /* drop interactive chrome that means nothing on paper */
+      .no-print { display: none !important; }
+      button { display: none !important; }
+      .no-print-sticky { position: static !important; }
+
+      /* don't split atomic blocks across pages — APPEND this file's own
+         card/panel class to the selector list on the next line */
+      table, tr, thead, figure, pre, blockquote, svg, .panel, .option, table.matrix, .tradeoffs, .reco, .opens li, .next-steps li { break-inside: avoid; }
+      h1, h2, h3 { break-after: avoid; }
+      p, li { orphans: 3; widows: 3; }
+
+      /* show destination of external links (paper can't be clicked) */
+      a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.82em;
+        color: var(--gray-500);
+        word-break: break-all;
+      }
+
+      body { padding: 0; }
+      .page { max-width: none; margin: 0; }
+    }
   </style>
 </head>
 <body>
