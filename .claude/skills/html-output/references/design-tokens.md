@@ -66,6 +66,48 @@ Every template in `templates/` uses the same palette and type system. When gener
 - Avoid drop shadows. Use borders + subtle background tints instead.
 - Avoid gradients except where a template explicitly uses them (rare).
 
+## Print / PDF
+
+Document artifacts should "Save as PDF" cleanly. The 10 document-shaped templates (`03`, `04`, `11`, `12`, `14`, `15`, `16`, `17`, `21`, `22`) carry the `@media print` block below in their `<style>`. It keeps on-screen color (diff, severity, accent) but drops the page background to white, removes interactive chrome, and stops cards/tables from splitting across pages. Editor (`18`–`20`) and prototype (`07`–`08`) templates do **not** get it — printing them is meaningless.
+
+Two utility hooks the block relies on:
+
+- **`.no-print`** — put on screen-only chrome (toolbars, copy/export buttons, demo controls, in-page nav). Hidden when printed.
+- **`.no-print-sticky`** — put on a `position: sticky`/`fixed` element that should still appear in print but flow inline instead of staying pinned.
+
+```css
+@media print {
+  /* keep on-screen color; only the page itself goes white */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { background: #fff; }
+
+  @page { margin: 16mm 14mm; }
+
+  /* drop interactive chrome that means nothing on paper */
+  .no-print { display: none !important; }
+  button { display: none !important; }
+  .no-print-sticky { position: static !important; }
+
+  /* don't split atomic blocks across pages — append the file's own
+     card/panel class to this list when integrating */
+  table, tr, thead, figure, pre, blockquote, svg { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
+
+  /* show destination of external links (paper can't be clicked) */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.82em;
+    color: var(--gray-500);
+    word-break: break-all;
+  }
+}
+```
+
+When integrating into a template: drop the block in verbatim, then (1) append that template's card/panel class to the `break-inside: avoid` rule, (2) tag screen-only chrome with `.no-print` and pinned bars with `.no-print-sticky`, and (3) if the file sets a large body padding, reset it under print (`body { padding: 0 }`). `reports/print-preview-status-report.html` is a rendered reference.
+
+**Interaction with dark mode:** the `background: #fff` line assumes a light artifact (all 10 document templates default light). If a dark variant of one of these is generated, drop or adjust that line so light text isn't placed on a white page — keep the dark surface and rely on `print-color-adjust: exact`.
+
 ## When the user wants a different palette
 
 If the user explicitly asks for "dark mode", "their brand colors", "blue theme", etc., adapt the tokens but **keep the structural rules** (hairline widths, border-radius, serif/sans/mono roles, layout density). The look-and-feel comes from the system, not just the colors.
