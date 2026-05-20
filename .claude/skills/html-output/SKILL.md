@@ -35,6 +35,10 @@ The templates live in `templates/` next to this file. They are full, populated e
 | Prompt-tuning / LLM-evaluation editor | `20-editor-prompt-tuner.html` |
 | **Implementation notes — running log of decisions, deviations, tradeoffs, and open questions captured while implementing a spec** | `21-implementation-notes.html` |
 | **Spike report — investigation of tech debt or a new feature, comparing 2–4 options with effort estimates, timeline, and a recommendation** | `22-spike-report.html` |
+| *…any of the above, in **dark mode*** (user asked for dark) | keep the chosen template; swap to the **Dark variant** tokens → see [Dark mode](#dark-mode) |
+| *…any of the above, **printed / saved as PDF*** | the 10 document templates already carry the print block → see [Print / PDF](#print--pdf) |
+
+The last two rows are **modifiers**, not separate picks: choose a template by structure first, then layer dark mode and/or print on top per those sections.
 
 If the request straddles two categories, pick the one whose **structure** matches best, not the one whose subject matter matches. A "code review of PR #312" is a code review (03), even if it's about a frontend feature. A "writeup of PR #312 I just merged" is a PR writeup (17). Code review = feedback before merge; PR writeup = explaining a finished change.
 
