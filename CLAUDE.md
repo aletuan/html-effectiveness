@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A gallery of 20 standalone HTML examples accompanying a blog post on using HTML as a flexible output format. The same files also ship as a Claude Code skill (`.claude/skills/html-output/`) so the gallery can be reused as a template library.
+A gallery of 22 standalone HTML examples accompanying a blog post on using HTML as a flexible output format. The same files also ship as a Claude Code skill (`.claude/skills/html-output/`) so the gallery can be reused as a template library.
 
 The repo is marked **"Sample code. Not maintained and not accepting contributions."** in the README — treat changes as illustrative rather than ongoing product work.
 
@@ -60,6 +60,15 @@ Pulled from `references/design-tokens.md` — these are what make the gallery fe
 - **Diff red/green is `--rust` / `--olive`**, not pure red/green.
 - **No drop shadows, no gradients** — use borders and subtle background tints.
 - **Serif weight is 500**, never bold. Letter-spacing slightly negative on large sizes.
+
+## Dark mode and print support
+
+Two cross-cutting capabilities, both documented in `references/design-tokens.md`:
+
+- **Print / PDF.** The 10 document templates (`03`, `04`, `11`, `12`, `14`, `15`, `16`, `17`, `21`, `22`) carry an `@media print` block so they "Save as PDF" cleanly — white page, color kept, no interactive chrome, no cards split across page breaks. The block lives in each file's `<style>`, so the **mirror rule applies to it too** (top-level ↔ `templates/`). When editing one of these templates, preserve the print block; when adding screen-only chrome, tag it `.no-print` (pinned bars `.no-print-sticky`). Editors (`18`–`20`) and prototypes (`07`–`08`) deliberately don't have it — printing them is meaningless.
+- **Dark mode.** Generated **on demand only** — the gallery stays light, and there's no `prefers-color-scheme` auto-switching. `design-tokens.md` has a "Dark variant" token set with the *same names* as the light tokens; a dark artifact swaps the `:root` values, adds `color-scheme: dark` + `<meta name="color-scheme" content="dark">`, and keeps every structural rule. Don't dark-mode anything pre-emptively.
+
+Rendered references for both live in `reports/` (`dark-palette-preview.html`, `print-preview-status-report.html`).
 
 ## How the skill picks a template
 
