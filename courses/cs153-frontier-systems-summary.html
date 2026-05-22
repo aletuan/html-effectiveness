@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stanford CS153 · Frontier Systems — course summary</title>
+<style>
+  :root {
+    --ivory:   #FAF9F5;
+    --slate:   #141413;
+    --clay:    #D97757;
+    --oat:     #E3DACC;
+    --olive:   #788C5D;
+    --gray-150:#F0EEE6;
+    --gray-300:#D1CFC5;
+    --gray-500:#87867F;
+    --gray-700:#3D3D3A;
+    --serif: ui-serif, Georgia, "Times New Roman", serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--ivory);
+    color: var(--gray-700);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    padding: 56px 24px 120px;
+  }
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 48px;
+  }
+  @media (max-width: 920px) { .page { grid-template-columns: 1fr; } nav { display: none; } }
+
+  /* ── nav ──────────────────────────────── */
+  nav { position: sticky; top: 32px; align-self: start; font-size: 13px; }
+  nav .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 12px;
+  }
+  nav a {
+    display: block;
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--gray-300);
+    color: var(--gray-700);
+    text-decoration: none;
+  }
+  nav a .ln { font-family: var(--mono); font-size: 10px; color: var(--gray-500); margin-right: 6px; }
+  nav a:hover { color: var(--slate); border-color: var(--slate); }
+  nav a:hover .ln { color: var(--clay); }
+  nav .empty-nav {
+    padding: 8px 0 8px 12px;
+    border-left: 2px solid var(--gray-300);
+    color: var(--gray-500);
+    font-size: 12px;
+    font-style: italic;
+  }
+  nav .files { margin-top: 28px; border-top: 1px solid var(--gray-300); padding-top: 16px; }
+  nav .files code { display: block; font-family: var(--mono); font-size: 11px; padding: 3px 0; }
+  nav .files a { color: var(--clay); text-decoration: none; }
+  nav .files a:hover { text-decoration: underline; }
+
+  /* ── header ───────────────────────────── */
+  header { margin-bottom: 12px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 40px;
+    color: var(--slate);
+    letter-spacing: -0.015em;
+    margin-bottom: 16px;
+  }
+  .tldr {
+    border: 1.5px solid var(--gray-300);
+    border-left: 3px solid var(--clay);
+    border-radius: 10px;
+    background: #fff;
+    padding: 16px 18px;
+    font-size: 15.5px;
+    max-width: 720px;
+  }
+  .tldr b { color: var(--slate); }
+
+  /* stack spine */
+  .spine { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin: 22px 0 0; }
+  .spine .layer {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--gray-700);
+    background: #fff;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 7px;
+    padding: 5px 10px;
+  }
+  .spine .layer.edge { border-left: 3px solid var(--clay); }
+  .spine .arrow { color: var(--gray-300); font-size: 12px; }
+
+  /* meta line */
+  .meta {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--gray-500);
+    margin-top: 18px;
+    letter-spacing: 0.02em;
+  }
+  .meta b { color: var(--gray-700); font-weight: 600; }
+
+  /* empty state */
+  .empty {
+    border: 1.5px dashed var(--gray-300);
+    border-radius: 10px;
+    background: rgba(227,218,204,0.18);
+    padding: 22px 20px;
+    margin-top: 36px;
+    color: var(--gray-500);
+    font-size: 14px;
+    max-width: 720px;
+  }
+  .empty b { color: var(--gray-700); }
+
+  /* ── lecture block ────────────────────── */
+  .lecture { margin-top: 44px; scroll-margin-top: 24px; }
+  .lec-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .lec-num { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--clay); letter-spacing: 0.04em; }
+  .speaker { font-family: var(--mono); font-size: 12px; color: var(--gray-500); }
+  .speaker b { color: var(--gray-700); font-weight: 600; }
+  .watch { font-size: 12.5px; margin-left: auto; }
+  .watch a { color: var(--clay); text-decoration: none; border-bottom: 1px solid var(--oat); }
+  .watch a:hover { border-color: var(--clay); }
+  .lecture h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 23px;
+    color: var(--slate);
+    letter-spacing: -0.01em;
+    margin: 8px 0 2px;
+  }
+
+  /* key ideas */
+  ol.ideas { list-style: none; counter-reset: idea; margin: 16px 0 0; max-width: 760px; }
+  ol.ideas > li {
+    counter-increment: idea;
+    position: relative;
+    padding: 11px 0 11px 42px;
+    border-top: 1px solid var(--gray-150);
+    font-size: 14.5px;
+    color: var(--gray-700);
+  }
+  ol.ideas > li:first-child { border-top: none; }
+  ol.ideas > li::before {
+    content: counter(idea, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 11px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--clay);
+    font-weight: 600;
+  }
+  ol.ideas li b { color: var(--slate); font-weight: 600; }
+  ol.ideas ul.sub { list-style: none; margin: 8px 0 2px; padding: 0; }
+  ol.ideas ul.sub li { position: relative; padding: 4px 0 4px 16px; font-size: 14px; }
+  ol.ideas ul.sub li::before { content: "·"; color: var(--clay); font-weight: 700; position: absolute; left: 3px; top: 3px; }
+
+  hr.div { border: none; border-top: 1px solid var(--gray-300); margin: 4px 0 0; }
+
+  .lec-sub { color: var(--gray-500); font-size: 14px; margin: 3px 0 0; max-width: 720px; }
+  .ideas-label, .actions-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gray-500); margin: 20px 0 2px;
+  }
+  a.ts {
+    font-family: var(--mono); font-size: 10.5px; color: var(--clay);
+    text-decoration: none; background: var(--gray-150);
+    border: 1px solid var(--gray-300); border-radius: 5px;
+    padding: 1px 6px; margin-right: 8px; white-space: nowrap;
+  }
+  a.ts:hover { border-color: var(--clay); }
+
+  /* action items panel */
+  .actions {
+    margin-top: 26px; border: 1.5px solid var(--oat);
+    background: rgba(227,218,204,0.30); border-radius: 12px; padding: 16px 20px 18px;
+  }
+  ol.act { list-style: none; counter-reset: act; margin: 6px 0 0; }
+  ol.act > li {
+    counter-increment: act; position: relative; padding: 13px 0 13px 30px;
+    border-top: 1px solid rgba(120,120,110,0.18); font-size: 14px; max-width: 760px;
+  }
+  ol.act > li:first-child { border-top: none; }
+  ol.act > li::before {
+    content: counter(act); position: absolute; left: 0; top: 13px;
+    font-family: var(--mono); font-size: 12px; color: var(--clay); font-weight: 600;
+  }
+  ol.act .at { color: var(--slate); font-weight: 600; }
+  ol.act .goal, ol.act .do { display: block; margin-top: 3px; }
+  ol.act .goal b, ol.act .do b { color: var(--gray-700); }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { background: #fff; }
+    @page { margin: 16mm 14mm; }
+    .no-print { display: none !important; }
+    button { display: none !important; }
+    .no-print-sticky { position: static !important; }
+    table, tr, thead, figure, pre, blockquote, svg,
+    .tldr, .spine, .empty, .lec-head, ol.ideas > li, ol.act > li { break-inside: avoid; }
+    h1, h2, h3 { break-after: avoid; }
+    p, li { orphans: 3; widows: 3; }
+    a[href^="http"]::after {
+      content: " (" attr(href) ")";
+      font-size: 0.82em; color: var(--gray-500); word-break: break-all;
+    }
+    body { padding: 0; }
+    .page { max-width: none; margin: 0; display: block; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── side nav: lecture index ── -->
+  <nav class="no-print">
+    <div class="label">Lectures</div>
+    <!-- LECTURE-NAV: links are inserted here as lectures are added -->
+    <a href="#lec-01"><span class="ln">01</span>The AI Native Company</a>
+    <a href="#lec-02"><span class="ln">02</span>The Compute Behind Intelligence</a>
+    <a href="#lec-03"><span class="ln">03</span>Energy Bottlenecks</a>
+    <a href="#lec-04"><span class="ln">04</span>VC &amp; Network Effects</a>
+    <a href="#lec-05"><span class="ln">05</span>PM in the AI Era</a>
+    <a href="#lec-06"><span class="ln">06</span>Unified Intelligence Systems</a>
+    <a href="#lec-07"><span class="ln">07</span>Visual Intelligence</a>
+    <a href="#lec-08"><span class="ln">08</span>The Future of Voice Systems</a>
+    <a href="#lec-09"><span class="ln">09</span>The Frontier Compute Stack</a>
+    <div class="files">
+      <div class="label">Source</div>
+      <code><a href="https://www.youtube.com/playlist?list=PLoROMvodv4rN447WKQ5oz_YdYbS74M5IA">YouTube playlist</a></code>
+      <code><a href="https://cs153.stanford.edu/">cs153.stanford.edu</a></code>
+    </div>
+  </nav>
+
+  <!-- ── main ── -->
+  <main>
+    <header>
+      <div class="eyebrow">Stanford CS153 · Course summary</div>
+      <h1>Frontier Systems</h1>
+      <div class="tldr">
+        <b>The course in one line</b> — “From energy, silicon and models to applications,
+        security and deployment policy, the infrastructure stack is undergoing a generational
+        rewrite.” A weekly seminar that walks the whole AI stack, putting students in the room
+        with the people building each layer.
+      </div>
+
+      <div class="spine" aria-label="The AI infrastructure stack">
+        <span class="layer edge">Energy</span><span class="arrow">→</span>
+        <span class="layer">Silicon</span><span class="arrow">→</span>
+        <span class="layer">Foundation models</span><span class="arrow">→</span>
+        <span class="layer">Applications</span><span class="arrow">→</span>
+        <span class="layer">Security</span><span class="arrow">→</span>
+        <span class="layer">Deployment &amp; policy</span>
+      </div>
+
+      <div class="meta">
+        Format: <b>weekly guest lectures</b> · Spring 2026 run <b>~10 weeks</b> (Mar 30 – Jun 3, 2026)
+        · <b>~30 industry leaders</b> across the stack
+      </div>
+    </header>
+
+    <!-- LECTURE-SECTIONS: each lecture's 10 key ideas are inserted here -->
+    <section class="lecture" id="lec-01">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 01</span>
+        <span class="speaker"><b>Garry Tan</b> · Y Combinator (CEO) · cùng Diana (GP)</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=Lri2LNYtERM">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>The AI Native Company</h2>
+      <p class="lec-sub">Công ty "thuần AI": cách một founder trở thành kỹ sư 1000× và cách tổ chức vận hành quanh các đại lý AI. Bấm vào mốc thời gian để nhảy tới đoạn tương ứng trong video.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=594s">09:54</a><b>Sự dịch chuyển đơn vị sản xuất</b> (Unit of Production Shift). Lập trình và xây dựng công ty trong kỷ nguyên mới không còn chỉ là sự phối hợp giữa con người với con người, mà là sự kết hợp chặt chẽ giữa con người và các hệ thống đại lý (agents) sở hữu bộ nhớ riêng biệt và khả năng tự đánh giá hiệu năng.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=699s">11:39</a><b>Định luật Năng suất 1000x</b> (The 1000x Engineer Reality). Việc ứng dụng các đại lý mã nguồn tự chủ (Agentic coding) như Claude Code, OpenClaw hay Hermes giúp kỹ sư đạt mức năng suất gấp 10 đến 100 lần so với các công cụ hỗ trợ thông thường (như Cursor), và gấp 1000 lần so với hiệu suất của một kỹ sư Google vào năm 2005.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=751s">12:31</a><b>Vượt qua giới hạn mã "Slop" bằng Kiểm thử</b> (Overcoming AI Slop with Tests). Điểm mấu chốt để đưa sản phẩm từ mã thử nghiệm (demo) lên môi trường vận hành thực tế (production) mà không bị lỗi logic hay ảo giác (hallucinations) là phải đạt từ 80% đến 90% tỷ lệ kiểm thử (test coverage) thông qua quy trình phê duyệt nghiêm ngặt.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=1131s">18:51</a><b>Tách biệt Không gian Xác định và Không gian Tiềm ẩn</b> (Deterministic vs. Latent Space). Khi xây dựng hệ thống AI Native, lập trình viên cần phân định rõ ràng: những tác vụ mang tính chính xác toán học/logic (như xử lý thời gian thực, quản lý ID) phải được viết bằng mã nguồn xác định (Deterministic code), trong khi các tác vụ linh hoạt mang tính nhận thức (như tóm tắt, phân tích ngữ cảnh) sẽ do LLM xử lý trong Không gian Tiềm ẩn (Latent Space).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=1490s">24:50</a><b>Khái niệm "Skillify" — biến hành động thành kỹ năng tự động.</b> Khi một đại lý AI thực hiện thành công một tác vụ phức tạp trong không gian tiềm ẩn, lập trình viên có thể nâng cấp mức độ trừu tượng bằng lệnh skillify để đóng gói quy trình đó thành một tệp runbook (markdown) và tái sử dụng tự động cho các lần sau.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=1557s">25:57</a><b>Quy trình 10 bước để đóng gói Kỹ năng</b> (The Skillify Pipeline). Việc viết mã và tạo file kỹ năng chỉ chiếm 2/10 bước trong quy trình. 8 bước còn lại hoàn toàn tập trung vào việc thiết lập hệ thống kiểm soát và tuân thủ, bao gồm: viết unit tests cho mã nguồn, tạo LLM evals cho file kỹ năng, tích hợp bài test tổng thể, và sử dụng LLM làm giám khảo (LLM as judge) để chấm điểm lỗi hệ thống.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=1626s">27:06</a><b>Hệ thống bộ nhớ ba lớp GBrain</b> (Three-Layer Memory System). Để giải quyết việc suy giảm hiệu năng của các hệ thống Wiki kiến thức thông thường, kiến trúc bộ nhớ nâng cao (như GBrain) cần kết hợp ba lớp: tìm kiếm vector (vector search), liên kết ngược (backlinks) và cơ sở dữ liệu đồ thị (graph database) nhằm lưu trữ chuẩn xác các niềm tin, giả định và tri thức thế giới.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=1926s">32:06</a><b>Vận hành công ty theo mô hình Vòng lặp đóng</b> (Closed-Loop Organization). Các công ty truyền thống thường vận hành theo vòng lặp mở (Open-loop), nơi thông tin bị phân tán và hao hụt qua tin nhắn Slack hay cuộc họp không ghi lại. Công ty thuần AI sử dụng các đại lý được cấp quyền đọc toàn bộ dữ liệu (codebase, Discord, âm thanh cuộc họp) để liên tục phân tích sai số và đề xuất hành động tiếp theo mà không bị thất thoát thông tin.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=2126s">35:26</a><b>Cơ cấu tổ chức siêu phẳng và vai trò mới</b> (Flat Org &amp; AI Founder). Trợ lý AI native làm giảm vai trò của quản lý cấp trung (middle management) — vốn trước đây chỉ làm nhiệm vụ điều hướng thông tin. Tổ chức mới sẽ rất phẳng và chỉ gồm 3 vai trò chính: người trực tiếp xây dựng sản phẩm (IC), người chịu trách nhiệm trực tiếp kết quả (DRI — thường là Founder) và AI Founder (người luôn thử nghiệm các công cụ AI mới ở ranh giới công nghệ).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=Lri2LNYtERM&amp;t=2253s">37:33</a><b>Gu thẩm mỹ (Taste) và Đánh giá thực tế (Evals) là năng lực bền vững.</b> Khi chi phí tạo ra mã nguồn tiến dần về con số 0, "gu thẩm mỹ" (taste) của con người để phân biệt cái tốt/xấu và việc tự thiết kế bộ tiêu chuẩn đánh giá (evals) đặc thù cho từng lĩnh vực chính là năng lực không thể bị thay thế. Các bảng điểm benchmark chung (như MMLU) không thể quyết định sản phẩm có làm hài lòng khách hàng thực tế hay không.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Ứng dụng mô hình DRI và thiết lập "nhật ký ngữ cảnh" cho dự án cá nhân.</span>
+            <span class="goal"><b>Mục tiêu:</b> trải nghiệm quy trình quản lý thông tin vòng lặp đóng (Closed-loop).</span>
+            <span class="do"><b>Thực hiện:</b> chọn một dự án nhỏ bạn đang làm. Thiết lập một kho lưu trữ tập trung (một file markdown hoặc không gian Discord riêng) ghi lại toàn bộ ghi chú cuộc họp, quyết định thiết kế và mã nguồn. Dùng một công cụ AI đọc toàn bộ kho này và yêu cầu nó đóng vai một "Kỹ sư IC", đưa ra đề xuất sửa bug hoặc tính năng tiếp theo dựa trên mục tiêu tổng thể của bạn (DRI).</span></li>
+          <li><span class="at">Thực hành quy trình "Skillify" thủ công cho một workflow.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu cách đóng gói một tác vụ từ Không gian tiềm ẩn sang tệp chạy tự động.</span>
+            <span class="do"><b>Thực hiện:</b> chọn một quy trình lặp lại (ví dụ: đọc một bài báo công nghệ → trích xuất ý chính → lưu vào file Markdown). Hướng dẫn chi tiết từng bước cho AI, điều chỉnh đến khi hoàn hảo. Sau đó yêu cầu AI viết lại toàn bộ thành một file <code>Runbook.md</code> chuẩn, và tự tạo một bộ tiêu chí (evals) để chấm điểm chất lượng các lần chạy sau.</span></li>
+          <li><span class="at">Nghiên cứu thị trường và thiết kế Kiến trúc Đại lý (Agent Blueprint) cho một "vùng trắng" (White Space).</span>
+            <span class="goal"><b>Mục tiêu:</b> áp dụng tư duy tìm "wedge" (điểm chốt) để lên ý tưởng cho một công ty AI Native.</span>
+            <span class="do"><b>Thực hiện:</b> dựa trên biểu đồ vùng trắng của Anthropic (tài chính, logistics, hỗ trợ khách hàng, vận tải…), chọn một lĩnh vực bạn chưa có kinh nghiệm. "Đóng vai undercover" — phỏng vấn hoặc tìm tài liệu chuyên sâu về các công việc thủ công bằng email/spreadsheet của lĩnh vực đó. Thiết kế sơ đồ hệ thống đại lý gồm các Kỹ năng (Skills) và Bộ điều phối (Resolvers) cần thiết để tự động hóa quy trình thô sơ ấy.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-02">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 02</span>
+        <span class="speaker"><b>Jensen Huang</b> · NVIDIA (CEO)</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=tsQB0n0YV3k">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>The Compute Behind Intelligence</h2>
+      <p class="lec-sub">Điện toán phía sau trí tuệ: tư duy co-design, vượt giới hạn Định luật Moore, và lộ trình phần cứng cho kỷ nguyên đại lý. Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=87s">01:27</a><b>Tái định nghĩa mô hình điện toán sau 60 năm.</b> Mô hình điện toán truyền thống — từ kiến trúc phần cứng, cách viết code, biên dịch cho đến phân phối sản phẩm — vốn không thay đổi nhiều kể từ thời IBM System 360 (cách đây hơn 60 năm). Hiện tại, lần đầu tiên trong lịch sử, toàn bộ ngăn xếp công nghệ (stack) đang được tái định nghĩa triệt để từ gốc rễ.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=154s">02:34</a><b>Chuyển dịch từ "Ghi lại" sang "Khởi tạo"</b> (Pre-recorded vs. Generated). Điện toán cũ chủ yếu dựa trên nội dung được ghi lại hoặc lập trình sẵn (hình ảnh, video, mã nguồn cố định). Điện toán mới là điện toán khởi tạo theo thời gian thực (Generated computing), giúp mọi phản hồi của máy tính nhất quán cao về ngữ cảnh và thích ứng trực tiếp với ý đồ (intention) của con người.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=522s">08:42</a><b>Sức mạnh của Tư duy đồng thiết kế</b> (Extreme Co-design). Tối ưu hóa riêng lẻ từng cấu phần đã chạm ngưỡng. NVIDIA thành công lớn nhờ đồng thiết kế đồng thời (Co-design) từ thuật toán, mô hình phần mềm, trình biên dịch cho đến kiến trúc chip, mạng lưới kết nối (networking) và hạ tầng lưu trữ để đạt hiệu năng tối đa.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=679s">11:19</a><b>Vượt giới hạn Định luật Moore</b> (1 triệu lần hiệu năng trong 10 năm). Khi Định luật Moore và mở rộng Dennard (Dennard scaling) cạn kiệt động lực, chỉ dựa vào chất bán dẫn thông thường thì hiệu năng tăng tối đa 10x trong 10 năm. Nhờ tư duy Co-design, NVIDIA đã tăng tốc độ điện toán lên tới 1 triệu lần (1,000,000x) trong một thập kỷ.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=462s">07:42</a><b>Sự xuất hiện của Trí tuệ vận hành liên tục</b> (Continuous Computing). Điện toán hiện nay là theo yêu cầu (on-demand), kích hoạt khi có lệnh gọi. Trong kỷ nguyên các hệ thống đại lý (agentic systems), máy tính chuyển sang trạng thái vận hành liên tục và tự chủ (continuously running) — thay đổi hoàn toàn cách thiết kế dịch vụ đám mây và máy tính cá nhân.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=2148s">35:48</a><b>Thiết kế phần cứng theo mô hình tác vụ</b> (Hardware Roadmap for Agents). Mỗi thế hệ chip của NVIDIA được thiết kế để giải quyết một bài toán lớn:
+          <ul class="sub">
+            <li><b>Hopper:</b> tối ưu cho Tiền huấn luyện mô hình (Pre-training).</li>
+            <li><b>Blackwell (NVLink72):</b> tối ưu cho Suy luận &amp; Khởi tạo token (Inference/Decode) bằng cách kết nối 72 chip thành một máy tính quy mô tủ rack (rack-scale).</li>
+            <li><b>Vera Rubin &amp; Feynman:</b> thiết kế riêng cho kỷ nguyên Đại lý (Agents) và bầy đàn đại lý (swarm of agents) — xử lý bộ nhớ dài hạn trực tiếp từ lưu trữ, tối ưu độ trễ cực thấp cho CPU khi chạy các công cụ phụ trợ.</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=1109s">18:29</a><b>Điện toán đại chúng qua mô hình mở</b> (Open Source AI). Để kích hoạt toàn bộ nền công nghiệp hạ nguồn, NVIDIA đầu tư mạnh vào các mô hình nền tảng mở chuyên biệt (domain-specific open models) như Bioneo (sinh học), Alpamo (xe tự hành), Groot (robot hình người) và Neimotron (ngôn ngữ), giúp các quốc gia quy mô nhỏ dễ tinh chỉnh (fine-tune) AI theo bản sắc riêng.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=1434s">23:54</a><b>Bảo mật minh bạch bằng hệ sinh thái AI bầy đàn</b> (Swarm Defence). Không thể bảo vệ một chiếc "hộp đen" công nghệ đóng kín. Cách tốt nhất chống lại mối đe dọa an ninh mạng từ các siêu AI tương lai là dùng hàng triệu, hàng tỷ AI mã nguồn mở chi phí thấp (ví dụ: Neimotron Nano) tạo thành một mạng lưới bầy đàn bao vây — một "lá chắn vòm" tự động phát hiện mã độc.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=1810s">30:10</a><b>Thước đo mới: Token trên mỗi Watt</b> (Tokens per Watt). Đo sức mạnh máy tính qua số phép tính thô (Flops) hay điểm SAT đã lỗi thời. Trong tương lai, chỉ số quan trọng nhất để đánh giá một hệ thống siêu điện toán AI native là lượng token (trí tuệ) sinh ra trên mỗi đơn vị điện năng tiêu thụ (Tokens per Watt).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=tsQB0n0YV3k&amp;t=2661s">44:21</a><b>Triết lý "Sự chịu đựng" và "Kiên cường"</b> (Resilience through Suffering). Jensen Huang nhắn nhủ sinh viên không nên chỉ tìm niềm vui hay đam mê dễ dàng. Sự kiên cường và "cơ bắp tinh thần" không tự nhiên sinh ra — nó chỉ hình thành khi con người trải qua áp lực, thất bại sâu sắc và chấp nhận dấn thân qua những giai đoạn thử thách (suffering) để học cách tự hoàn thiện.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Thực hành tối ưu hóa toàn diện (Co-design) trên một bài toán nhỏ.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu cách phối hợp nhịp nhàng giữa thuật toán (phần mềm) và phần cứng để tăng hiệu năng, thay vì chỉ phụ thuộc vào nâng cấp máy móc.</span>
+            <span class="do"><b>Thực hiện:</b> chọn một tác vụ xử lý dữ liệu hoặc huấn luyện một mô hình ML nhỏ (ví dụ phân loại ảnh/văn bản). Thay vì tăng Epochs hoặc đổi GPU mạnh hơn, hãy thử: (1) đổi cấu trúc dữ liệu đầu vào (FP32 → FP16 hoặc INT8); (2) tối ưu Batch size hợp với kiến trúc cache của phần cứng đang dùng; (3) đo tốc độ (tokens/giây hoặc ảnh/giây) trước và sau khi tinh chỉnh để thấy rõ sức mạnh của đồng tối ưu hóa.</span></li>
+          <li><span class="at">Tương tác với tài liệu học thuật qua trợ lý AI (mô hình "siêu nghiên cứu").</span>
+            <span class="goal"><b>Mục tiêu:</b> áp dụng cách học thời gian thực bằng AI, giống cách Jensen Huang cập nhật kiến thức.</span>
+            <span class="do"><b>Thực hiện:</b> chọn một bài báo mới về Frontier AI hoặc kiến trúc đại lý (ví dụ trên arXiv), đưa vào một mô hình lớn (hoặc Claude Code/ChatGPT) và: (1) yêu cầu tóm tắt các đóng góp cốt lõi; (2) yêu cầu liên kết chéo với 3 bài báo liên quan; (3) đối thoại phản biện — "Điểm yếu trong phương pháp luận là gì?", "Kiến trúc phần cứng hiện tại sẽ gặp nút thắt (bottleneck) nào khi chạy thuật toán này?".</span></li>
+          <li><span class="at">Thiết kế mô hình "AI vận hành liên tục" (Continuous / Agentic Workflow).</span>
+            <span class="goal"><b>Mục tiêu:</b> chuyển tư duy từ "gọi lệnh khi cần" (on-demand) sang "hệ thống tự chạy tuần hoàn" (continuous).</span>
+            <span class="do"><b>Thực hiện:</b> thiết kế một workflow dùng các Agent thực thi liên tục để theo dõi một mục tiêu. Ví dụ: một script chạy ngầm (cron job) tự động theo dõi lỗi của ứng dụng bạn đang viết, gom error logs, gửi ngữ cảnh đó cho một Agent AI (qua API) để tự tạo bản vá (patch) hoặc đề xuất mã sửa lỗi trong Git mà không chờ con người kích hoạt.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-03">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 03</span>
+        <span class="speaker"><b>Scott Nolan</b> · General Matter (Founder &amp; CEO)</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=znlGltyc6Yw">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>Energy Bottlenecks</h2>
+      <p class="lec-sub">Nút thắt năng lượng: vì sao điện — chứ không phải chip — đang là rào cản cuối của Frontier AI, và vì sao làm giàu uranium là "nút thắt của nút thắt". Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=219s">03:39</a><b>Nút thắt tối thượng của mô hình "nhà máy AI"</b> (The Ultimate Supply Chain Bottleneck). Quá trình sản xuất trí tuệ nhân tạo (huấn luyện, tối ưu và vận hành đại lý) phụ thuộc hoàn toàn vào các trung tâm dữ liệu — nhưng hạ tầng đó vô giá trị nếu thiếu điện. Áp lực vô hình từ bài toán năng lượng và lưới điện đang trở thành rào cản lớn nhất, quyết định tốc độ phát triển của Frontier AI.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=289s">04:49</a><b>Hai làn sóng "crunch" điện năng: từ tiêu dùng đến doanh nghiệp</b> (December 2025 Moment). Làn sóng crunch năng lượng đầu tiên xuất hiện sau khi ChatGPT bùng nổ cuối năm 2022. Đến tháng 12/2025, việc ra mắt Claude 4.6 kích hoạt làn sóng thứ hai: doanh nghiệp ồ ạt đưa AI native vào quy trình thực tế, đẩy nhu cầu tiêu thụ điện của các cụm đám mây lên mức tăng trưởng siêu tuyến tính (super-linear).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=579s">09:39</a><b>Sự đồng thuận của các nhà lãnh đạo Frontier</b> (Converging to Energy). Các nhà điều hành công nghệ hàng đầu — dù ở các mảng khác nhau — đều thừa nhận năng lượng là rào cản cuối cùng. Sam Altman (OpenAI) cho rằng chi phí AI sẽ quy về chi phí điện; Jensen Huang (NVIDIA) thừa nhận trên Joe Rogan rằng năng lượng là nút thắt lớn hơn chip; và Elon Musk cũng đặt năng lượng làm ưu tiên hàng đầu.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=811s">13:31</a><b>Cạn kiệt "năng lượng mắc kẹt"</b> (The End of Stranded Energy). Cuối những năm 2010 và đầu 2020, các trung tâm dữ liệu và mỏ đào Bitcoin thường tận dụng "năng lượng mắc kẹt" (stranded energy) — điện dư thừa ở đập thủy điện hẻo lánh, địa nhiệt cô lập hay điện gió West Texas. Nay những nguồn "béo bở" có sẵn này đã bị khai thác cạn, buộc ngành công nghiệp phải tạo ra nguồn điện ròng hoàn toàn mới (net new power).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=1370s">22:50</a><b>Bitcoin mining là "buổi tổng duyệt" của hạ tầng AI</b> (The Bitcoin Dress Rehearsal). Đào Bitcoin trong quá khứ thực chất là một cuộc tổng duyệt quan trọng cho kỷ nguyên AI. Các công ty hạ tầng như Crusoe (với dự án Stargate ở West Texas) đã học cách biến khí methane đốt bỏ hoặc điện gió mắc kẹt thành điện cục bộ. Khi cơn sốt AI ập đến, họ chỉ việc nâng quy mô và chuyển công năng sang phục vụ các cụm GPU chuyên dụng.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=975s">16:15</a><b>Điện nền và sự khan hiếm tua-bin khí</b> (Base load vs. Turbine Scarcity). Siêu trung tâm dữ liệu đòi hỏi điện nền (base load) chạy 24/7 với độ ổn định tuyệt đối (uptime). Solar/điện gió nếu thiếu hệ thống pin lưu trữ khổng lồ thì chưa hiệu quả về chi phí. Hệ quả là cơn sốt xây nhà máy tua-bin khí tự nhiên, khiến thời gian chờ đặt tua-bin hiện bị kéo dài tới vài năm vì chuỗi cung ứng quá tải.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=1041s">17:21</a><b>Hạt nhân là lựa chọn dài hạn duy nhất của các hyperscaler.</b> Xét hai yếu tố — không phát thải carbon và độ an toàn thực tế — dữ liệu lịch sử cho thấy hạt nhân (nuclear) có phát thải thấp nhất và an toàn tương đương điện gió (vượt qua định kiến từ Three Mile Island hay Fukushima). Vì vậy mọi ông lớn đám mây (hyperscaler) đều đang đặt cược vào hạt nhân trong tầm nhìn 5–10 năm tới.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=1159s">19:19</a><b>Làm giàu uranium — nút thắt của nút thắt</b> (Enrichment Bottleneck). Hạt nhân phụ thuộc vào chuỗi 5 bước: khai thác quặng → chuyển hóa thành khí → làm giàu (enrichment) → tái chuyển hóa thành rắn → chế tạo viên nhiên liệu. Hiện Mỹ nắm chưa đầy 0,1% thị phần toàn cầu ở bước làm giàu uranium, phải phụ thuộc châu Âu, thậm chí nhập từ Nga bất chấp lệnh trừng phạt. Không tự chủ làm giàu uranium nghĩa là không thể mở rộng quy mô hạt nhân để cấp điện cho AI.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=2614s">43:34</a><b>Kỷ nguyên lò phản ứng mô-đun nhỏ (SMRs) và "ground game".</b> Giai đoạn 2028–2029 sẽ chứng kiến hàng chục lò phản ứng mô-đun nhỏ (SMRs) hoặc vi lò phản ứng (micro-reactors) được sản xuất hàng loạt tại nhà máy rồi vận chuyển thẳng đến nơi đặt trung tâm dữ liệu. Scott Nolan cho rằng năng lượng vũ trụ (vệ tinh data center đồng bộ mặt trời) sẽ là sân riêng của SpaceX; trận chiến của các công ty còn lại hoàn toàn là một "ground game" — ai chiếm lĩnh hạ tầng hạt nhân trước.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=znlGltyc6Yw&amp;t=2460s">41:00</a><b>AI kích hoạt sự phục hưng của thế giới vật lý</b> (AI-driven Job Creation). Trái với định kiến AI hủy diệt việc làm, nhu cầu mở rộng quy mô AI đang kích hoạt một cuộc phục hưng trong thế giới vật lý. General Matter — startup non trẻ thành lập đầu 2024, đạt hợp đồng 900 triệu USD với Bộ Năng lượng Mỹ (DOE) nhờ tư duy phân tích hệ thống đúng đắn — đang tạo ra hàng nghìn việc làm chất lượng cao, từ kỹ sư công nghệ ở California đến công nhân xây dựng và vận hành nhà máy làm giàu uranium tại Paducah, Kentucky.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Phân tích nút thắt năng lượng của một ứng dụng AI cụ thể.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu mối liên kết từ dòng code bạn viết đến lượng điện tiêu thụ trong thế giới thực (tư duy quy đổi sang Joules).</span>
+            <span class="do"><b>Thực hiện:</b> viết một script nhỏ đo/ước tính chi phí năng lượng khi chạy một tác vụ AI (ví dụ gọi API sinh ảnh Stable Diffusion, hoặc chạy một đại lý Claude Code liên tục 1 tiếng). Dùng công cụ tính điện năng GPU/server hoặc tra tài liệu tiêu thụ năng lượng trên mỗi token của mô hình. Quy đổi chi phí vận hành từ tiền tệ sang đơn vị năng lượng (Joules hoặc kWh) để tập tư duy hạ tầng theo góc nhìn macro của kỹ sư frontier.</span></li>
+          <li><span class="at">Nghiên cứu case study về "điện toán mắc kẹt" (Stranded Computing).</span>
+            <span class="goal"><b>Mục tiêu:</b> tìm hiểu cách doanh nghiệp biến bài toán địa lý năng lượng thành lợi thế cạnh tranh.</span>
+            <span class="do"><b>Thực hiện:</b> đọc sâu mô hình vận hành của Crusoe Energy hoặc dự án Stargate, rồi viết một bài phân tích Markdown ngắn: tại sao đặt cụm GPU cạnh mỏ dầu/khí ở vùng xa lại tối ưu hơn truyền tải điện về thành phố lớn qua cáp? Rào cản viễn thông lớn nhất (băng thông, độ trễ mạng) khi đặt nhà máy AI ở sa mạc/nông thôn là gì, và họ đã xử lý ra sao?</span></li>
+          <li><span class="at">Đóng vai DRI quy hoạch nguồn điện cho một cụm data center AI native.</span>
+            <span class="goal"><b>Mục tiêu:</b> thực hành tư duy DRI (Direct Responsible Individual) trong quản trị rủi ro chuỗi cung ứng phần cứng.</span>
+            <span class="do"><b>Thực hiện:</b> giả định bạn là DRI xây một trung tâm dữ liệu AI native phục vụ huấn luyện một LLM vào năm 2028 (cần ~100 MW ổn định liên tục). Lập kế hoạch phân bổ nguồn điện theo timeline 5 năm: (1) năm 1–2 — mua điện lưới truyền thống hay dùng tua-bin khí (đối mặt thời gian chờ đặt tua-bin)? Có kết hợp Solar + Battery để giảm tải chi phí ban ngày không? (2) năm 3–5 — làm sao tiếp cận và ký hợp đồng mua điện dài hạn (PPA) với các đơn vị phát triển SMRs để khỏi "hit the wall" (chạm trần năng lượng)?</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-04">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 04</span>
+        <span class="speaker"><b>Ben Horowitz</b> · Andreessen Horowitz (a16z), Co-founder</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=wisccQYTRQc">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>Venture Capital &amp; Network Effects</h2>
+      <p class="lec-sub">Vì sao a16z được thiết kế như một "hệ thống" và một mạng lưới, và AI thay đổi luật chơi của khởi nghiệp ra sao. Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=306s">05:06</a><b>Hệ thống hóa cấu trúc vốn đầu tư mạo hiểm</b> (Venture Capital Systems). Khi thành lập Andreessen Horowitz (a16z) năm 2009, Ben Horowitz nhận thấy mô hình VC truyền thống là sản phẩm rất tốt cho các nhà góp vốn giới hạn (LPs) nhờ tỷ suất lợi nhuận cao, nhưng lại là sản phẩm rất tệ cho doanh nhân — vì họ không hỗ trợ gì nhiều ngoài tiền. a16z được thiết kế như một hệ thống vận hành toàn diện để nâng giá trị sản phẩm dành cho người sáng lập.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=350s">05:50</a><b>"Phần mềm đang ăn cả thế giới"</b> (Software Is Eating the World). Trước kỷ nguyên a16z, dữ liệu lịch sử ngành VC mặc định mỗi năm chỉ có tối đa 15 công ty công nghệ đạt mốc 100 triệu USD doanh thu. a16z đi đầu với luận điểm "phần mềm đang ăn cả thế giới" và dự đoán con số này tăng lên 200 công ty/năm, mở đường cho việc mở rộng quy mô quỹ ở mức chưa từng có.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=452s">07:32</a><b>Chia sẻ kinh tế, tập trung kiểm soát</b> (Centralized Control). Các quỹ VC truyền thống vận hành như mô hình hợp tác chia sẻ quyền lực (partnership), khiến việc tái cấu trúc gần như bất khả thi vì vấp phải phản đối nội bộ. a16z chọn giải pháp: chia sẻ lợi ích kinh tế nhưng tập trung quyền kiểm soát (centralized control) — giúp quỹ linh hoạt chia tách và mở rộng sang Crypto, Bio hay American Dynamism.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=536s">08:56</a><b>Quy mô của một cuộc hội thoại tìm kiếm sự thật</b> (Truth-Seeking Conversation). Đầu tư là chuỗi các cuộc hội thoại tìm kiếm sự thật ở độ phân giải cao (high-fidelity). Quy mô tối ưu của một nhóm thảo luận là khoảng 7 người (nếu thấu hiểu và ăn ý). Khi lên tới 30 người, cuộc hội thoại lập tức biến thành một buổi thuyết trình và đánh mất khả năng tìm kiếm sự thật.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=852s">14:12</a><b>Kiến trúc quỹ dựa trên hiệu ứng mạng lưới</b> (Network Effects Firm). a16z là quỹ VC đầu tiên tự kiến trúc mình như một mạng lưới sở hữu hiệu ứng mạng lưới (network effect). Bằng cách chủ động xây dựng quan hệ sâu rộng với từng kỹ sư, nhà điều hành ở Thung lũng Silicon và mọi tập đoàn lớn mua công nghệ, a16z tạo giá trị gia tăng theo cấp số nhân (n²) — startup nhận vốn từ họ lập tức được "bơm" thẳng vào một mạng lưới quyền lực.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=1109s">18:29</a><b>Tư duy "bare-knuckle" và phòng thủ bằng sự thù ghét</b> (The Counter-Copy Strategy). Bước ra từ ngành phần mềm doanh nghiệp khốc liệt, Ben Horowitz mang tư duy chiến đấu không khoan nhượng vào ngành VC. Bằng các bài blog tấn công trực diện vào thói xấu của VC truyền thống và phát ngôn gai góc, ông đẩy đối thủ vào thế "thù ghét" a16z. Chính sự thù ghét đó vô tình ngăn đối thủ sao chép mô hình mới của a16z trong thời gian dài, dù mô hình đang chứng minh hiệu quả vượt trội.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=1227s">20:27</a><b>AI thay đổi luật chơi: tiền có thể mua được thời gian</b> (Money Can Buy Time). Trong kỷ nguyên phần mềm truyền thống, một công ty không thể dùng tiền để bắt kịp đối thủ dẫn trước 2 năm (nhồi thêm kỹ sư chỉ gây quá tải giao tiếp — định luật Brooks). Nhưng với AI, tiền có thể giải bài toán thời gian: đủ tiền để mua lượng GPU khổng lồ và thu thập đủ dữ liệu thì có thể san phẳng khoảng cách công nghệ trong thời gian ngắn. Vì vậy cuộc đua AI trở thành cuộc đua khốc liệt về tổng vốn (capital race).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=1553s">25:53</a><b>Hình hài của một ý tưởng khởi nghiệp tốt</b> (Shape of Good Ideas). Một ý tưởng xuất sắc không phải tạo ra thứ chung chung, mà là một giải pháp buộc phải tồn tại nhưng chưa ai làm. Trong kỷ nguyên AI, xây lại một Salesforce rẻ hơn một nửa không phải ý tưởng hay; ý tưởng đúng là tái định nghĩa toàn bộ trải nghiệm và bản chất công việc của một tổ chức bán hàng (ví dụ: không còn cảnh nhân viên nhập liệu thủ công trên giao diện UI nghèo nàn).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=3499s">58:19</a><b>"Weighing machine" vượt qua "đại nạn SaaS"</b> (The SaaS Apocalypse). Phố Wall đang hoảng loạn trước "đại nạn SaaS" vì tin rằng các Frontier Lab như Anthropic có thể "one-shot" quét sạch mọi phần mềm lớp trên bằng sức mạnh AI. Ben Horowitz khẳng định Phố Wall thường sai vì mua "câu chuyện kể" (narrative) ngắn hạn thay vì "sự thật" (facts). Theo triết lý Warren Buffett: ngắn hạn thị trường là máy bỏ phiếu (voting machine), dài hạn là máy cân đo (weighing machine). Các công ty có lợi thế chuỗi cung ứng sâu và kênh bán hàng đặc thù (như Navan trong du lịch doanh nghiệp) sẽ chứng minh năng lực kiếm tiền bền vững và đập tan các câu chuyện cường điệu.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=wisccQYTRQc&amp;t=3083s">51:23</a><b>Tiếng nói công nghệ tại Washington và rủi ro của sự sợ hãi.</b> Ngành công nghệ trong quá khứ không có tiếng nói ở Washington DC, dẫn đến các chính sách siết chặt tiêu cực (như lệnh cấm GPU toàn cầu suýt đóng băng cuộc đua AI của Mỹ). Ben nhấn mạnh: rủi ro lớn nhất của quốc gia không phải bản thân AI, mà là nỗi sợ dẫn đến quản lý quá mức — tự trói chân mình bằng các chính sách đóng cửa data center và nhường quyền làm chủ Siêu trí tuệ (super-intelligence) vào tay các đối thủ địa chính trị lớn như Trung Quốc.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Vận dụng "Leave Your Ego at the Door" để bootstrapping mạng lưới cá nhân.</span>
+            <span class="goal"><b>Mục tiêu:</b> xây dựng mạng lưới quan hệ cốt lõi dựa trên trao đổi giá trị thay vì thể hiện cái tôi.</span>
+            <span class="do"><b>Thực hiện:</b> lập danh sách 3–5 bạn học/đồng nghiệp bạn đánh giá xuất sắc nhất. Chủ động đề xuất một buổi thảo luận nhóm (dưới 7 người để tối ưu "sự thật" như Ben nói). Cam kết nguyên tắc: tập trung hoàn toàn vào giải bài toán công nghệ, phản biện thẳng thắn dựa trên dữ liệu, không tự ái cá nhân. Sự gắn kết từ những buổi "tìm kiếm sự thật" này chính là viên gạch đầu tiên tạo nên hiệu ứng mạng lưới cho sự nghiệp của bạn.</span></li>
+          <li><span class="at">Phân tích "moat" (lợi thế phòng thủ) của một ý tưởng AI.</span>
+            <span class="goal"><b>Mục tiêu:</b> luyện phân biệt "vỏ bọc UI" dễ tổn thương và "lợi thế phòng thủ cốt lõi" chống lại các Frontier Labs.</span>
+            <span class="do"><b>Thực hiện:</b> chọn một ý tưởng startup AI native (hoặc một sản phẩm đang có trên thị trường), viết bản phân tích rủi ro 1 trang Markdown trả lời: (1) nếu thế hệ mô hình kế tiếp (GPT-5 hay Claude 5) nâng mạnh khả năng suy luận, sản phẩm của bạn có bị thay thế hoàn toàn (one-shot) không? (2) Moat của bạn nằm ở đâu — dữ liệu độc quyền không thể cào từ internet? Tích hợp sâu vào chuỗi cung ứng phức tạp ngoài đời thực mà AI không chạm tới? Hay kênh phân phối (distribution) đặc thù khó tiếp cận?</span></li>
+          <li><span class="at">Áp dụng "Culture is a set of actions" vào nhóm dự án hiện tại.</span>
+            <span class="goal"><b>Mục tiêu:</b> thiết lập tiêu chuẩn hành vi cụ thể để loại bỏ xung đột chính trị và "infighting" trong đội ngũ.</span>
+            <span class="do"><b>Thực hiện:</b> thay vì các giá trị chung chung ("chăm chỉ", "tôn trọng"), hãy cụ thể hóa văn hóa nhóm thành 3 hành động định lượng: (1) mọi tin nhắn công việc được phản hồi (hoặc thả emoji xác nhận) trong tối đa 2 tiếng giờ làm việc; (2) mọi Pull Request bắt buộc kèm Unit Test trước khi nhờ người khác review; (3) khi bất đồng về kiến trúc, trưởng nhóm (DRI) ra quyết định cuối sau tối đa 30 phút thảo luận để giữ tốc độ vận hành (break the tie).</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-05">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 05</span>
+        <span class="speaker"><b>Nikhyl Singhal</b> · Skip (Founder) · ex-Meta, Google</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=BQrJ4lHAjhc">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>Product Management in the AI Era</h2>
+      <p class="lec-sub">PM là gì, vai trò đó đổi thế nào theo chu kỳ tăng trưởng, và vì sao AI đang đào thải "người vận chuyển thông tin" để nhường chỗ cho "nhà kiến tạo sản phẩm". Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=268s">04:28</a><b>Bản chất của Quản trị Sản phẩm</b> (Product Management — PM). Trong bất kỳ công ty công nghệ nào luôn có một nhóm chuyên xây dựng sản phẩm (kỹ sư/nhà thiết kế) và một nhóm chuyên bán sản phẩm (sales/marketing). PM chính là lớp "keo dính" (glue) ở giữa, chịu trách nhiệm kết nối những gì khách hàng thực sự cần với giải pháp mà đội ngũ kỹ thuật có thể xây dựng.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=288s">04:48</a><b>Sự bất đối xứng của PM theo chu kỳ S-Curve.</b> Vai trò PM thay đổi hoàn toàn tùy vị trí của doanh nghiệp trên đường cong tăng trưởng (S-Curve):
+          <ul class="sub">
+            <li><b>0-to-1 (tìm Product-Market Fit):</b> chưa cần PM. Công việc chính là của founder — thử nghiệm liên tục, đập đi xây lại để tạo ra "khói và lửa".</li>
+            <li><b>Đạt Product-Market Fit:</b> bắt đầu cần PM để tạo quy trình, sự ổn định, kiểm soát chất lượng và đồng bộ khi tổ chức phình to thành nhiều đội độc lập.</li>
+            <li><b>Hyper-growth &amp; late-stage:</b> cần một đội PM lớn dưới quyền CPO để đồng thời làm hai việc cực khó — mở rộng sản phẩm cũ (scale) và khai phá dòng sản phẩm phụ cận mới (expand).</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=826s">13:46</a><b>Tốc độ cải tiến quan trọng hơn điểm khởi đầu</b> (Iteration Speed over Quality). Những sản phẩm vĩ đại nhất (Android thế hệ đầu hay trình duyệt Chrome) khi mới ra mắt đều rất tệ và thô kệch. Lợi thế cốt lõi giúp Chrome đánh bại Firefox hay Android đối đầu iOS không phải chất lượng ban đầu, mà là tốc độ vòng lặp cải tiến (iteration speed): Chrome cập nhật mỗi 6 tuần, Android mỗi quý — vượt xa chu kỳ tính bằng năm của các đối thủ cũ.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=1460s">24:20</a><b>AI xóa sổ vai trò "người vận chuyển thông tin"</b> (Information Movers are Roadkill). Trong quá khứ, 80% công việc của một PM trung cấp là thu thập, đóng gói dữ liệu, viết status report và chuyển giao thông tin lên cấp quyết định cao hơn qua các buổi họp liên miên. Nay AI có thể tự đọc toàn bộ log chat khách hàng, ghi âm cuộc họp sales, tổng hợp dữ liệu và xếp ưu tiên theo doanh thu gần như hoàn hảo. Những PM thuần "di chuyển thông tin" sẽ bị đào thải đầu tiên (roadkill).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=1961s">32:41</a><b>Sự trỗi dậy của "nhà kiến tạo sản phẩm"</b> (Product Builders). Ranh giới giữa PM, kỹ sư và nhà thiết kế đang bị xóa nhòa nhanh chóng nhờ AI. Ngành không còn cần những người "quản lý" đơn thuần (manager), mà khát khao các Nhà kiến tạo sản phẩm (Product Builders) — người có "gu" thẩm mỹ, có chính kiến về tính năng cần xây, đồng thời đủ "gritty" (kiên trì) lội sâu vào dữ liệu để kiểm chứng giả thuyết.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=1139s">18:59</a><b>Tư duy quản trị sự nghiệp: thiết lập chương tiếp theo</b> (The Skip Framework). Với tuổi lao động kéo dài và thời gian gắn bó trung bình với một công ty công nghệ chỉ 2–3 năm, một người trẻ sẽ trải qua 15–18 công việc trong đời. Vì vậy sự nghiệp không phải một trận đấu đơn lẻ, mà là các chương của một cuốn sách. Bí quyết của khung "Skip": khi chọn công việc đầu tiên, hãy luôn hỏi nó chuẩn bị bệ phóng thế nào cho công việc thứ hai của bạn.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=1673s">27:53</a><b>Sự phân rã của quản lý cấp trung</b> (The Middle Manager Crisis). Cuộc khủng hoảng sa thải quy mô lớn (layoffs) ở các tập đoàn công nghệ hiện nay thực chất là quá trình "nén phẳng" cấu trúc tổ chức. Lớp quản lý cấp trung — những người được thăng chức trong kỷ nguyên lãi suất 0% chỉ để quản lý con người mà không tự xây dựng hay đưa ra phán quyết sản phẩm — đang bị loại bỏ để nhường chỗ cho các nhóm mật độ cao (dense teams).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=2131s">35:31</a><b>Bẫy quy mô lớn và khuyết tật của sự đồng thuận</b> (The Trap of Consensus). Ở các công ty lớn như Google, quy trình nội bộ thường kẹt vào việc tìm đồng thuận (consensus) và giải quyết mâu thuẫn "trong tòa nhà" trước khi tung sản phẩm ra ngoài. Ngược lại, Apple hay Meta vận hành theo ý chí mạnh mẽ của nhà sáng lập (founder-driven). Để tạo ra đột phá lớn, rủi ro cao (như canh bạc Metaverse hay xe tự hành), tổ chức buộc phải chấp nhận phán quyết độc đoán từ người đứng đầu thay vì biểu quyết dân chủ.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=2515s">41:55</a><b>Ảo ảnh "thuyết kịch nghệ" trong doanh nghiệp</b> (Corporate Theatrics). Ngành phần mềm truyền thống bị thao túng bởi "thuyết kịch nghệ": các buổi trình diễn slide bóng bẩy, các cuộc họp Zoom dày đặc được "xào nấu" qua nhiều tầng cấp bậc (từ IC4 lên Giám đốc, lên VP) trong khi người thực sự làm thí nghiệm ở dưới đáy lại không có mặt trong phòng họp. Kỷ nguyên AI native đang khai tử kịch nghệ này bằng văn hóa "không họp hành" (no-meeting), tập trung hoàn toàn vào ground truth (sự thật dưới mặt đất).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=BQrJ4lHAjhc&amp;t=2884s">48:04</a><b>Sự sụp đổ của giá trị "bảo chứng thương hiệu" cũ.</b> Giá trị của những "bảo chứng thương hiệu" cũ (như 6 năm kinh nghiệm ngồi họp ở Google) đang mất giá nghiêm trọng. Các nhà tuyển dụng hàng đầu (Anthropic, OpenAI) không quan tâm bạn từng làm ở đâu — họ đánh giá mức độ hiện đại (modernity) trong tư duy và cách bạn làm chủ các công cụ AI. Khi kiến thức trở thành dịch vụ (Knowledge as a Service), năng lực tối thượng là tư duy hệ thống (systems mindset) để biết cấu phần nào đáng được xây dựng.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Lập bản đồ khung "Skip" cho 2 chương sự nghiệp tiếp theo.</span>
+            <span class="goal"><b>Mục tiêu:</b> thực hành tư duy có chủ đích (intentional) về lộ trình, thoát khỏi bẫy "tìm việc đầu tiên chỉ vì lương".</span>
+            <span class="do"><b>Thực hiện:</b> viết một trang Markdown phác lộ trình cá nhân. <b>Chương 1</b> (việc đầu sau tốt nghiệp): mục tiêu không phải thương hiệu lớn, mà là một vị trí hands-on (kỹ sư phần mềm hoặc Product Builder) tại một startup tăng trưởng nhanh, nơi bạn buộc phải dùng công cụ AI (như Claude Code) 24/7 để tối ưu năng suất. <b>Chương 2</b> (sau ~3 năm): công việc ở Chương 1 cung cấp những kỹ năng cốt lõi nào (tốc độ vận hành, tư duy hệ thống, mạng lưới quan hệ) để bạn tự tin bước vào vai trò Founder hoặc Trưởng nhóm sản phẩm cốt lõi (DRI)?</span></li>
+          <li><span class="at">Tự động hóa phần "di chuyển thông tin" để giải phóng năng lực kiến tạo.</span>
+            <span class="goal"><b>Mục tiêu:</b> học cách tự "obsolete" các phần việc nhàm chán bằng AI để tập trung vào phán quyết (judgment).</span>
+            <span class="do"><b>Thực hiện:</b> chọn một tác vụ thuộc dạng "di chuyển thông tin" (ví dụ: đọc toàn bộ phản hồi của nhóm → viết báo cáo tiến độ cho giảng viên/quản lý). Thiết lập một Agent AI (hoặc prompt chuyên sâu) tự thu thập hội thoại, phân tích xung đột, sắp xếp ưu tiên việc cần làm và xuất ra file báo cáo. Dùng thời gian được giải phóng để trực tiếp sửa code hoặc nói chuyện với người dùng.</span></li>
+          <li><span class="at">Kiểm tra mức độ "hiện đại" (Modernity Test) của bản thân.</span>
+            <span class="goal"><b>Mục tiêu:</b> đảm bảo bạn không tự biến mình thành "khảo cổ học công nghệ" trước khi bước vào thị trường tuyển dụng khốc liệt.</span>
+            <span class="do"><b>Thực hiện:</b> tự thách thức bằng một bài test thực tế — xây một ứng dụng web hoàn chỉnh (MVP) trong tối đa 48 tiếng bằng cách phối hợp hoàn toàn với AI (vibe coding / Claude Code). Ghi nhật ký: mất bao lâu để giải thích system design cho AI? Bạn có thể dùng AI tự debug lỗi mà không cần mở tài liệu cũ kỹ không? Nếu tạo được sản phẩm chất lượng cao trong thời gian cực ngắn nhờ AI, bạn đã sở hữu năng lực "hiện đại" mà OpenAI hay Anthropic tìm kiếm.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-06">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 06</span>
+        <span class="speaker"><b>Amit Jain</b> · Luma AI (Co-founder &amp; CEO)</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=6nUl_w5W9Wk">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>Unified Intelligence Systems</h2>
+      <p class="lec-sub">Từ quét 3D đến "world model": vì sao kiến trúc hợp nhất (một backbone cho mọi giác quan) đang thay thế các tháp xử lý biệt lập. Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=209s">03:29</a><b>Nguồn gốc của "thế giới mô phỏng"</b> (The Genesis of World Simulator). Từ kinh nghiệm phát triển hệ thống LiDAR (cảm biến trên iPhone, dự án xe tự hành Titan và Vision Pro), Amit Jain nhận ra máy tính tương lai cần một phương thức truyền thông hoàn toàn mới, vượt qua camera 2D truyền thống. Kết hợp khả năng mở rộng quy mô (scaling) của mô hình ngôn ngữ với tối ưu hóa vi phân 3D (differentiable 3D), ta có thể xây dựng một hệ thống hiểu và mô phỏng được toàn bộ thế giới vật lý.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=317s">05:17</a><b>Tính khả vi trong học sâu là gì?</b> (What is Differentiable?). "Khả vi" (differentiable) nghĩa là một hàm/hệ thống có thể đưa vào vòng lặp huấn luyện (training loop), có một hàm mất mát (loss function) để tối ưu hóa lặp đi lặp lại. Nếu một cấu phần là phi khả vi, ta không thể thực hiện lan truyền ngược (gradient descent). Công cụ cốt lõi của kỷ nguyên AI hiện tại bản chất chỉ xoay quanh: sức mạnh tính toán (compute) và gradient descent.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=402s">06:42</a><b>Quy luật vật lý của quy mô dữ liệu</b> (The Physics of Data Scale). Ban đầu Luma phát triển ứng dụng quét 3D (Luma 3D Capture, dùng NeRF và Gaussian Splatting). Nhưng họ nhanh chóng nhận ra: dù ứng dụng phổ biến đến đâu, lượng dữ liệu 3D một công ty tự thu thập không bao giờ bắt kịp quy mô hàng thập kỷ của ảnh và video có sẵn trên internet. Quy tắc tối thượng của AI: phải thiết kế thuật toán chạy theo quy mô dữ liệu có sẵn, chứ không ép dữ liệu chạy theo thuật toán. Đây cũng là nút thắt lớn nhất của ngành robot (thiếu "internet dữ liệu hành động").</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=482s">08:02</a><b>Bước ngoặt kiến trúc Hopper và sự trỗi dậy của "video 3D".</b> Bộ não con người học về không gian 3D qua lăng kính thời gian (time proxy). Video thực chất là một thực thể ba chiều: hai chiều không gian (X, Y) và một chiều thời gian (T). Khi kiến trúc chip NVIDIA Hopper ra đời năm 2023, Luma nhận ra phần cứng đã đủ mạnh để huấn luyện một mô hình hiểu thế giới trực tiếp qua video — dẫn tới Dream Machine (tháng 3/2024) với 6 triệu người dùng chỉ trong 1 tháng.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=995s">16:35</a><b>Sự hạn chế của kiến trúc "tháp riêng lẻ"</b> (The Disparate Towers Limitation). Tới 2025, các mô hình đa phương tiện (như Stable Diffusion hay các hệ thống cũ) bản chất là kiến trúc "fused" gắn kết lỏng lẻo: gồm các tháp xử lý biệt lập (ngôn ngữ, hình ảnh, video, âm thanh) nối với nhau bằng một "cây cầu mỏng" (thin bridge / VAE / encoders, khoảng 700–800M tham số). Mô hình ngôn ngữ chỉ dịch prompt của con người thành một embedding tĩnh cho mô hình hình ảnh. Kiến trúc này thất bại hoàn toàn khi xử lý các tác vụ yêu cầu tính nhân quả (causality) và thời gian thực.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=1665s">27:45</a><b>Kiến trúc Trí tuệ Hợp nhất</b> (Unified Architecture Backbone). Kiến trúc thế hệ mới của Luma (Uni1) loại bỏ hoàn toàn các tháp biệt lập. Dựa trên bản chất của mạng Transformer (không quan tâm đầu vào liên tục hay rời rạc), Uni1 mã hóa ngôn ngữ, mã nguồn, âm thanh, hình ảnh và video vào cùng một không gian vector đầu vào và xử lý trên cùng một "xương sống" (single backbone) — tương tự cách vỏ não (neocortex) xử lý mọi giác quan tại một nơi để tư duy và phán quyết.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=1160s">19:20</a><b>Từ "trình tạo pixel" sang "hành động cuối"</b> (End-to-End Work). Mô hình AI năm 2026 không còn dừng ở các đoạn video 5 giây biệt lập. Luma hướng tới vòng lặp đóng kiểu REPL (Read-Eval-Print Loop) cho thế giới vật lý và sáng tạo: người dùng đưa ý tưởng, AI thực hiện toàn bộ công việc từ đầu đến cuối (end-to-end) — tạo cả một chiến dịch quảng cáo, sản xuất trọn một tập phim, hoặc điều khiển một chuỗi hành động robot phức tạp — rồi tự đánh giá kết quả của chính mình.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=1924s">32:04</a><b>Cấu trúc hệ thống máy tính tương lai</b> (Future Computer Architecture). Một hệ thống đại lý AI tương lai gồm 3 tầng:
+          <ul class="sub">
+            <li><b>Tầng đáy — Unified Model:</b> lớp mô hình hợp nhất chịu trách nhiệm tư duy, thông dịch dữ liệu đa phương tiện, hiểu ngữ cảnh và kích hoạt các lệnh gọi công cụ.</li>
+            <li><b>Tầng giữa — Tool Harness:</b> hệ thống kết nối công cụ — tương tác với hệ điều hành Linux, gọi hàm API, chạy và biên dịch mã nguồn.</li>
+            <li><b>Tầng đỉnh — Fat Stack of Skills:</b> kho kỹ năng chuyên biệt của từng ngành dọc do con người tải lên (ví dụ: cẩm nang 50 trang về quy chuẩn thiết kế slide đẹp, hoặc sơ đồ lưới điện của một tập đoàn năng lượng).</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=2951s">49:11</a><b>Bản chất sáng tạo: đòn bẩy cho nghệ sĩ</b> (Leverage for Creatives). Bản thân mô hình AI không "sáng tạo" hay "không sáng tạo" — nó chỉ là một bộ máy tính toán; việc đánh giá và đưa ra phán quyết (judgment) của con người mới là hành vi sáng tạo cốt lõi. Trước đây chỉ lập trình viên có "đòn bẩy" (viết code một lần, chạy một tỷ lần trên mọi thiết bị). Nay nhờ kiến trúc hợp nhất, các nhà sáng tạo nghệ thuật cũng có đòn bẩy đó: chỉ cần dạy mô hình "gu" thẩm mỹ và tư duy xuất sắc của mình một lần, mô hình tái tạo sự xuất sắc đó hàng nghìn lần trong nhiều ngữ cảnh khác nhau.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=6nUl_w5W9Wk&amp;t=3052s">50:52</a><b>Canh bạc điện ảnh và việc khai tử tư duy "Private Equity"</b> (Hollywood is Default Dead). Hollywood thực tế đã suy thoái từ lâu vì mô hình tài chính kiểu Private Equity (PE): chỉ vắt kiệt giá trị từ các thương hiệu cũ có sẵn (Guardians of the Galaxy phần 7, Avengers phần 20, đa vũ trụ) thay vì thử nghiệm ý tưởng mới. Việc ứng dụng Luma Agent (như series "Old Stories", 4,5 triệu USD/tập trên Prime Video) giúp nhà làm phim cắt giảm chi phí sản xuất khổng lồ, cho phép song song hóa việc thử nghiệm và khai phá hàng trăm câu chuyện mới lạ với chi phí cực thấp.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Đánh giá tư duy không gian (Spatial Reasoning): VLM thường vs. Unified Model.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu khoảng cách năng lực giữa một LLM "mù không gian" và một mô hình có nhãn quan trực quan.</span>
+            <span class="do"><b>Thực hiện:</b> vẽ một sơ đồ khối (mindmap) hoặc bản phác thảo thiết kế hệ thống thô trên giấy, chụp ảnh lại. (1) Đưa ảnh vào một VLM thông thường (ChatGPT/Gemini) và yêu cầu giải thích các mối liên kết và khoảng cách vị trí giữa các khối; (2) thử trên một công cụ Agent đa phương tiện thế hệ mới (như Luma Canvas/Uni1 nếu có quyền truy cập) để chuyển sơ đồ vẽ tay thành một trang web tương tác hoặc chuỗi slide đồng bộ theo đúng bố cục không gian. Quan sát mô hình nào hiểu "vị trí lưới" (grid nature) của hình ảnh tốt hơn.</span></li>
+          <li><span class="at">Thiết kế một "tệp kỹ năng chuyên biệt" (Skill Layer) cho mô hình đại lý tương lai.</span>
+            <span class="goal"><b>Mục tiêu:</b> thực hành đóng gói tri thức con người vào "Tầng đỉnh" (Fat Stack of Skills) trong cấu trúc máy tính tương lai của Amit Jain.</span>
+            <span class="do"><b>Thực hiện:</b> chọn một kỹ năng thế mạnh của bạn (ví dụ: quy chuẩn viết code sạch cho dự án React, hoặc bộ quy tắc phối màu UI/UX), viết một tài liệu Markdown dài (prompt chuyên sâu đóng vai một skill file) mô tả: thế nào là đầu ra "tốt" theo tiêu chuẩn con người, các lỗi "tệ" cần tránh, và các bước tư duy logic AI cần tuân thủ. Nạp file này làm ngữ cảnh (context) cho Agent của bạn rồi ra lệnh thực thi để kiểm chứng mức độ tuân thủ tiêu chuẩn.</span></li>
+          <li><span class="at">Case study: dịch chuyển từ "Diffusion" sang "Autoregressive" trong xử lý video.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu vì sao các Frontier Lab đang dịch ranh giới công nghệ ra khỏi mô hình khuếch tán thuần túy.</span>
+            <span class="do"><b>Thực hiện:</b> đọc các bài báo/bài viết mới (2025–2026) về sự kết hợp giữa mô hình tự hồi quy (autoregressive — giống cách LLM đoán token tiếp theo) và khuếch tán (diffusion) trong sinh video/ảnh, rồi viết một bài phân tích Markdown: nút thắt lớn nhất của diffusion thuần túy khi mở rộng quy mô (scaling) là gì? Tại sao biến pixel thành "visual tokens" để huấn luyện chung trên một Transformer (unified backbone) lại giúp mô hình hiểu thời gian và tính nhân quả (causality) tốt hơn?</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-07">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 07</span>
+        <span class="speaker"><b>Andreas Blattmann</b> · Black Forest Labs (Co-founder) · đồng tác giả Stable Diffusion</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=CBaLU0dDEY8">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>Visual Intelligence</h2>
+      <p class="lec-sub">Từ latent diffusion (nền tảng của Stable Diffusion) đến mô hình đa phương tiện hợp nhất, và vì sao video là giao diện tốt nhất để AI học về thế giới. Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=416s">06:56</a><b>Nguồn gốc thuật toán Khuếch tán Ẩn</b> (Latent Diffusion Invention). Tại một phòng thí nghiệm nhỏ ở Đại học Heidelberg năm 2019, đối mặt với sự thiếu hụt nghiêm trọng về sức mạnh tính toán (compute) so với Google hay OpenAI, Andreas Blattmann và cộng sự phát minh ra Khuếch tán ẩn (Latent Diffusion). Thay vì huấn luyện trực tiếp trên không gian pixel khổng lồ và lãng phí, họ nén hình ảnh vào một không gian ẩn (latent space) số chiều thấp hơn nhưng tương đương về tri giác (như một codec JPEG thông minh), tiết kiệm hàng triệu USD chi phí tính toán. Đây chính là nền tảng sinh ra Stable Diffusion.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=699s">11:39</a><b>Đại diện nhân tạo vs. đại diện tự nhiên</b> (Natural vs. Unnatural Data). Thế giới dữ liệu chia làm hai dạng:
+          <ul class="sub">
+            <li><b>Đại diện nhân tạo (Unnatural):</b> như văn bản (text) — công cụ do con người tạo ra qua tiến hóa để giao tiếp hiệu quả, mật độ thông tin cực cao, gần như không có dữ liệu thừa (redundancy).</li>
+            <li><b>Đại diện tự nhiên (Natural):</b> như hình ảnh, video, âm thanh — tín hiệu tồn tại khách quan trong tự nhiên (quang phổ điện từ, sóng âm). Trẻ em học thế giới trong 3–5 năm đầu đời hoàn toàn bằng cách quan sát và nghe các tín hiệu tự nhiên này trước khi học chữ.</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=922s">15:22</a><b>Canh bạc mô hình đa phương tiện hợp nhất</b> (Unified Multimodal Models). Kỷ nguyên của các mô hình đơn phương thức (unimodal) phục vụ thuần túy cho sáng tạo nội dung như Stable Diffusion thế hệ đầu đã kết thúc. State-of-the-art hiện nay là mô hình đa phương tiện hợp nhất (unified multimodal) cho các tín hiệu tự nhiên — nền tảng cho Trí tuệ thị giác (Visual Intelligence), AI thế giới vật lý (Physical AI), robot, và khả năng điều khiển máy tính bằng "mắt nhìn".</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=993s">16:33</a><b>Sức mạnh của mối tương quan đa giác quan</b> (Cross-Modal Correlation). Huấn luyện đồng thời trên nhiều luồng dữ liệu tự nhiên tạo ra hiệu ứng tích lũy (compounding) mạnh mẽ về trí tuệ. Ví dụ, khi mô hình quan sát hai vật cứng va chạm, nó đồng thời ghi nhận âm thanh phát ra. Sự tương quan giữa "nhìn" và "nghe" giúp AI hiểu bản chất vật lý của thế giới sâu sắc hơn nhiều so với việc chỉ học từ một tháp dữ liệu biệt lập.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=1303s">21:43</a><b>Tính nhất quán nhân vật và giải pháp "Context"</b> (Character Consistency). Khoảng 18 tháng trước, các mô hình tạo ảnh có một lỗ hổng lớn: thiếu tính nhất quán nhân vật — người dùng đưa ảnh của mình vào, yêu cầu thêm một chiếc mũ, nhưng kết quả ra một người hoàn toàn khác. Nhờ cào dữ liệu từ chuỗi phản hồi ngữ cảnh (context feedback loop) của người dùng thực, Black Forest Labs (BFL) đã tái thiết kế đội ngũ và tung ra dòng chỉnh sửa ảnh Flux.1 Kontext (viết bằng "K" theo phong cách tiếng Đức) giải quyết triệt để bài toán này chỉ trong 60 ngày, "supercharge" toàn bộ ngành marketing.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=3033s">50:33</a><b>Tự hồi quy vs. khuếch tán/khớp dòng</b> (Autoregressive vs. Flow Matching/Diffusion). Có khác biệt sâu sắc về bản chất toán học giữa hai trường phái:
+          <ul class="sub">
+            <li><b>Tự hồi quy (Autoregressive — như LLM):</b> lặp dọc theo chiều dữ liệu (sinh từng token một), rất hiệu quả khi huấn luyện song song (data efficient) nhưng tốn thời gian ở bước suy luận (inference).</li>
+            <li><b>Khuếch tán / Khớp dòng (Diffusion / Flow Matching):</b> lặp trên một chiều thời gian nhân tạo trực giao (orthogonal) với dữ liệu — từ nhiễu trắng thuần túy sang ảnh sạch. Huấn luyện kém hiệu quả về dữ liệu (data inefficient) vì mỗi ảnh có vô số điểm nhiễu, nhưng bước suy luận có thể tối ưu vượt bậc nhờ chưng cất (distillation).</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=3115s">51:55</a><b>Đột phá Chưng cất Khuếch tán Đối kháng</b> (Adversarial Diffusion Distillation). Để giải bài toán suy luận chậm, BFL áp dụng Chưng cất khuếch tán đối kháng (ADD). Thuật toán này chưng cất các bước khử nhiễu của mô hình Flow Matching từ 50 bước xuống còn 4 bước, thậm chí 1 bước duy nhất, mà không làm suy giảm chất lượng hình ảnh thực tế — mang lại tốc độ xử lý gần real-time đáng kinh ngạc.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=3274s">54:34</a><b>Chiến lược thương mại bằng "độ dài bước suy luận".</b> Khác với LLM phải chia mô hình thành nhiều kích thước (Haiku, Sonnet, Opus), dòng Flux.1 giữ nguyên một kích thước tham số "xương sống" nhưng đóng gói thành 3 phiên bản dựa trên số bước khử nhiễu:
+          <ul class="sub">
+            <li><b>Flux.1 Schnell ("nhanh"):</b> chưng cất xuống 4 bước, mã nguồn mở Apache 2.0, miễn phí cho lập trình viên chạy local.</li>
+            <li><b>Flux.1 Dev:</b> mở trọng số (open weights) nhưng giấy phép thương mại hạn chế để cộng đồng tùy biến.</li>
+            <li><b>Flux.1 Pro:</b> chạy tối đa số bước khử nhiễu cho chất lượng hoàn hảo nhất, đóng kín sau cổng API thương mại để tạo doanh thu bền vững.</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=3444s">57:24</a><b>Trí tuệ không gian ẩn</b> (Implicit vs. Explicit 3D Representation). Trái với tư duy cũ cho rằng AI cần cấu trúc hình học 3D tường minh (explicit 3D như point clouds hay 3D meshes để robot định vị), Andreas Blattmann đưa ra quan điểm trái ngược (contrarian): bộ não con người không có trục tọa độ 3D nào trong đầu khi nhìn một chai nước; ta chỉ nhìn thế giới qua ảnh chiếu 2D dạng video trên hai mắt và hiểu cấu trúc 3D một cách ẩn ý (implicit) thông qua chuyển động đầu và tương tác vật lý. Video chính là giao diện tối ưu nhất để AI học về không gian.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=CBaLU0dDEY8&amp;t=2867s">47:47</a><b>Văn hóa "Debate and Commit" — vũ khí ngoài Thung lũng Silicon.</b> Khác với văn hóa nhảy việc liên tục ở vùng vịnh San Francisco, startup 3 tỷ USD Black Forest Labs đóng đô tại thị trấn nhỏ Freiburg (Đức) với một văn hóa kỳ tích: chỉ duy nhất 1 nhân sự rời công ty trong suốt lịch sử. Triết lý: tranh luận nảy lửa (debate), chấp nhận khác biệt (disagree), và khi đã quyết thì cùng nhau dốc sức thực thi (commit). Sự đoàn kết này giúp một nhóm nhỏ 25 kỹ sư duy trì "conviction" (lòng tin sắt đá) để sống sót và đánh bại các phòng lab nghìn tỷ USD.</li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Thử nghiệm tính nhất quán nhân vật bằng Flux chạy local.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu cách Flux.1 xử lý các điều kiện biên (boundary conditions) của không gian ẩn khi duy trì nhận diện khuôn mặt.</span>
+            <span class="do"><b>Thực hiện:</b> tải Flux.1 Schnell hoặc Dev về máy local (hoặc chạy qua nền tảng miễn phí như Hugging Face Spaces/Replicate). (1) tạo một chuỗi 3 ảnh của cùng một nhân vật hư cấu trong 3 bối cảnh khác nhau ("phi hành gia trên Sao Hỏa", "uống cà phê ở Paris", "lướt sóng ở Hawaii"); (2) đánh giá mô hình có giữ nhất quán cấu trúc khuôn mặt không, rồi thử Inpainting/Editing (Context) bằng cách khoanh vùng một chi tiết để yêu cầu thêm/bớt vật thể, kiểm chứng độ chính xác tri giác.</span></li>
+          <li><span class="at">Nghiên cứu kiến trúc "Self-Flow" trong học sâu đa phương tiện.</span>
+            <span class="goal"><b>Mục tiêu:</b> đọc hiểu và phân tích bài báo đột phá của BFL về sự thẳng hàng representation (alignment loss).</span>
+            <span class="do"><b>Thực hiện:</b> tìm trên arXiv bài "Self-Flow" do Andreas Blattmann và đội ngũ Black Forest Labs công bố (khoảng tháng 3/2026), rồi viết bản phân tích ~1 trang Markdown: Self-Flow giải quyết bài toán "stupid pixel generator" (máy tạo pixel ngu ngốc) như thế nào? Làm sao nó tận dụng các mô hình biểu trưng cũ (như DINO cho hình ảnh) để ép trọng số của Transformer thế hệ mới hiểu được ngữ nghĩa (semantics) của video và âm thanh đồng thời?</span></li>
+          <li><span class="at">Áp dụng "Debate, Disagree, and Commit" vào nhóm nghiên cứu hiện tại.</span>
+            <span class="goal"><b>Mục tiêu:</b> xây dựng văn hóa nhóm mật độ cao (dense team), loại bỏ "infighting" làm phân rã nhóm.</span>
+            <span class="do"><b>Thực hiện:</b> trong buổi họp dự án/bài tập nhóm tiếp theo, đề xuất áp dụng quy tắc của BFL — <b>Bước 1 (Debate):</b> dành 20 phút đầu để mọi người phản biện nảy lửa, đưa mọi góc nhìn trái chiều về kiến trúc/cách giải mà không sợ bị phán xét; <b>Bước 2 (Disagree):</b> chấp nhận không bao giờ có đồng thuận 100%, trưởng nhóm (DRI) lắng nghe rồi chốt phương án cuối; <b>Bước 3 (Commit):</b> ngay khi DRI quyết, tất cả (kể cả người phản đối ở Bước 1) dừng tranh cãi và dồn 100% năng lượng thực thi với tinh thần đoàn kết.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-08">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 08</span>
+        <span class="speaker"><b>Mati Staniszewski</b> · ElevenLabs (Co-founder &amp; CEO)</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=vfF011ko89o">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>The Future of Voice Systems</h2>
+      <p class="lec-sub">Mô hình chồng tầng (cascaded) vs. hợp nhất (fused), bản địa hóa AI, đại lý giọng nói real-time và "phép thử Turing cảm xúc". Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=321s">05:21</a><b>Nút thắt ngôn ngữ quốc tế và cảm hứng khởi nghiệp.</b> Tại Ba Lan (quê hương hai nhà sáng lập ElevenLabs), một bộ phim nước ngoài chiếu trên TV thường được thuyết minh (dubbing) cực kỳ thô sơ: một giọng nam duy nhất đọc đều đều (monotone) tất cả lời thoại của cả nhân vật nam, nữ, người già lẫn trẻ em, để khán giả tự cảm nhận cảm xúc. Trải nghiệm tệ hại đó thôi thúc Mati Staniszewski rời Google và Piotr rời Palantir để cùng xây ElevenLabs với tầm nhìn phá bỏ rào cản ngôn ngữ toàn cầu.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=470s">07:50</a><b>Mô hình chồng tầng vs. mô hình hợp nhất</b> (Cascaded vs. Fused). Xử lý tiếng nói và chuyển ngữ (dubbing) ban đầu là một chuỗi chồng tầng (cascaded) gồm 3 mô hình độc lập:
+          <ul class="sub">
+            <li><b>Speech-to-Text:</b> nhận diện, bóc băng lời thoại và tách tạp âm nền.</li>
+            <li><b>LLM:</b> hạt nhân dịch thuật và hiệu chỉnh ngữ nghĩa theo ngữ cảnh.</li>
+            <li><b>Text-to-Speech:</b> khởi tạo lại giọng nói ở ngôn ngữ mới nhưng mượn phong cách biểu cảm từ file gốc.</li>
+          </ul>
+        </li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=640s">10:40</a><b>Tối ưu hóa năng lực "chặng cuối"</b> (Last-Mile Generation). Năm 2022, khi hạ tầng dịch của LLM còn thô sơ, ElevenLabs ra một quyết định chiến lược: không phân tán nguồn lực vào tháp dịch thuật hay bóc băng, mà dồn toàn lực vào chặng cuối — công nghệ tạo giọng nói (Text-to-Speech). Họ tập trung giải hai bài toán chưa ai làm được lúc đó: tái tạo đặc tính giọng nói tự nhiên như người, và làm cho giọng nói tuân thủ sắc thái cảm xúc của toàn bộ văn bản (biết câu nào đọc vui vẻ, câu nào là hội thoại trong sách).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=843s">14:03</a><b>Bước ngoặt từ mô hình mở "Tortoise TTS" và kỷ nguyên tự hồi quy.</b> ElevenLabs thế hệ đầu được truyền cảm hứng lớn từ Tortoise TTS — một mô hình mã nguồn mở xuất sắc do James Betker (khi đó là kỹ sư Google) tự phát triển vào ban đêm và cuối tuần. Tortoise cho thấy tiềm năng tạo các đoạn âm thanh ngắn giống hệt tiếng người. ElevenLabs kết hợp ý thức hệ của Tortoise với mạng Transformer và mô hình tự hồi quy (autoregressive) để biến một dự án nghiên cứu không ổn định thành hệ thống thương mại đọc được văn bản dài (audiobooks).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=1211s">20:11</a><b>Sự bùng nổ của bản địa hóa AI</b> (AI Localization in 2024). Sang 2024, khi hợp nhất thành công tháp bóc băng, LLM dịch thuật và bộ sinh giọng nói, ElevenLabs tạo ra một cuộc cách mạng về bản địa hóa AI. Minh chứng chấn động: chuyển ngữ bài phát biểu tại Liên Hợp Quốc của Tổng thống Argentina Javier Milei, hay các cuộc đối thoại của Lex Fridman với nguyên thủ quốc gia (Tổng thống Zelensky của Ukraine, Thủ tướng Modi của Ấn Độ) sang tiếng Anh nhưng vẫn giữ nguyên chất giọng, độ nảy âm và nhịp điệu biểu cảm đặc trưng của chính họ.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=1255s">20:55</a><b>Sự trỗi dậy của đại lý giọng nói tương tác real-time</b> (Interactive Voice Agents). Đến 2025, ElevenLabs chuyển mạnh sang đại lý giọng nói tương tác (voice agents) chạy real-time. Hệ thống chồng tầng giờ phải tự dự đoán thời điểm người dùng dừng câu để lập tức kích hoạt LLM sinh câu trả lời và Text-to-Speech đọc lên với độ trễ cực thấp. Mati nhận định: mô hình hợp nhất (fused — AI tự sinh token âm thanh trực tiếp từ sóng âm, không qua văn bản) có lợi thế tuyệt đối về tốc độ (~300ms), hợp cho các app "người tình ảo" (companions); nhưng mô hình chồng tầng (cascaded) vẫn là "vua" trong môi trường doanh nghiệp nhờ khả năng kiểm soát, gài điều kiện và bảo mật tuyệt đối.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=1548s">25:48</a><b>Vượt qua "phép thử Turing cảm xúc"</b> (Emotional Turing Test). Cột mốc lớn nhất của ElevenLabs năm 2026 là khả năng kiểm soát cảm xúc (Expressivity Mode). Nhờ một năm đầu tư khổng lồ vào dán nhãn dữ liệu âm thanh (labeling) để phân loại các sắc thái — phấn khích, căng thẳng, buồn bã — đại lý giọng nói nay có thể tự phát hiện cảm xúc trong giọng khách hàng để phản hồi tương ứng (trấn an người đang hoảng loạn, chung vui với người đang hào hứng), chính thức bước vào cuộc đua vượt phép thử Turing về giọng nói cảm xúc.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=2528s">42:08</a><b>Triết lý định giá dựa trên giá trị</b> (Value-Based Pricing). Nhiều startup AI phạm sai lầm khi tính giá dựa trên chi phí phần cứng (cost-plus). Triết lý của ElevenLabs là định giá dựa trên giá trị mang lại cho khách hàng (value-based) và tính ngược lại. Tiêu chuẩn vàng của một mô hình kinh doanh AI native bền vững: chỉ cần thu về 1/10 giá trị thực tế mà sản phẩm giúp khách hàng tiết kiệm hoặc tạo ra.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=3193s">53:13</a><b>Hạ tầng giọng nói trên thiết bị</b> (On-Device Voice AI). ElevenLabs đã giải được bài toán chưng cất mô hình để chạy trực tiếp trên thiết bị (on-device) với giới hạn một ngôn ngữ cụ thể, mở ra khả năng thuyết minh không cần internet. Tuy vậy, Mati khẳng định luôn có khoảng cách năng lực lớn giữa Edge AI (chỉ chạy Text-to-Speech thô) và Cloud AI (xử lý các tác vụ nặng về tương tác cảm xúc, kết nối cơ sở dữ liệu và bảo mật); ElevenLabs định vị mình là hạ tầng nền tảng (platform) quản lý toàn bộ hệ thống "piping" phức tạp đó.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=vfF011ko89o&amp;t=3072s">51:12</a><b>Đòn bẩy nhân đạo và ngoại giao chủ quyền quốc gia</b> (Sovereign Deployments). ElevenLabs ứng dụng công nghệ vào hai dự án nhân văn lớn:
+          <ul class="sub">
+            <li><b>Hồi phục giọng nói:</b> giúp hơn 10.000 bệnh nhân ung thư vòm họng hoặc ALS lấy lại giọng nói tự nhiên của mình để giao tiếp.</li>
+            <li><b>Hạ tầng quốc gia thời chiến:</b> phối hợp với chính phủ Ukraine tích hợp trợ lý giọng nói vào siêu ứng dụng công dân Diia, giúp hàng triệu người mất chỗ ở gọi điện nhận hướng dẫn tự động về hộ chiếu, trợ cấp y tế và giáo dục xuyên suốt khủng hoảng mà không nghẽn thủ tục hành chính.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Xây một trợ lý giọng nói chồng tầng (Cascaded Voice Script) bằng Python.</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu cấu trúc kết nối 3 tầng của hệ Cascaded Voice Agent phổ biến trong doanh nghiệp.</span>
+            <span class="do"><b>Thực hiện:</b> viết một đoạn Python (hoặc dùng no-code như Make/n8n) thiết lập vòng lặp: (1) dùng thư viện Speech-to-Text (như OpenAI Whisper) ghi âm giọng bạn và chuyển thành văn bản; (2) nạp văn bản vào LLM (API Claude/OpenAI) kèm system prompt định hình tính cách ("đóng vai một trợ lý tổng đài lịch sự"); (3) lấy phản hồi của LLM nạp vào API ElevenLabs để xuất file âm thanh. Đo tổng độ trễ (latency) của cả hệ thống và tìm cách tối ưu các bước gọi API.</span></li>
+          <li><span class="at">Nghiên cứu kiến trúc "Conversation Speech Model" (CSM) của Sesame.</span>
+            <span class="goal"><b>Mục tiêu:</b> tìm hiểu trường phái đối nghịch (fused / omni model) qua mô hình nguồn mở Mati nhắc tới.</span>
+            <span class="do"><b>Thực hiện:</b> lên GitHub hoặc tìm tài liệu kỹ thuật về CSM (Conversation Speech Model) do phòng lab Sesame (sáng lập bởi cựu CEO Oculus Brendan Iribe) công bố, rồi viết một bài phân tích Markdown ngắn: mô hình này trộn "audio tokens" và "text tokens" vào chung một không gian xử lý như thế nào? Vì sao nó đạt độ trễ phản hồi cực thấp (~300ms) so với hệ thống bạn tự xây ở Hành động 1?</span></li>
+          <li><span class="at">Thiết kế hệ thống kiểm soát rủi ro (Guardrails &amp; Watermarking) cho ứng dụng Voice AI.</span>
+            <span class="goal"><b>Mục tiêu:</b> thực hành tư duy bảo mật hạ tầng đối phó nạn lừa đảo bằng giọng nói (voice spoofing / scam).</span>
+            <span class="do"><b>Thực hiện:</b> đóng vai kỹ sư an ninh hệ thống (Security DRI) cho một startup tài chính, thiết kế quy trình bảo mật 3 lớp — <b>Lớp 1:</b> thay xác thực bằng giọng nói (voice authentication) bằng xác thực 2 yếu tố (2FA qua app/SMS), theo khuyến nghị của ElevenLabs; <b>Lớp 2:</b> bộ lọc đầu vào kiểm tra file ghi âm cuộc gọi có chứa dấu hiệu tần số của giọng nhân tạo (AI watermark) hay không; <b>Lớp 3 (tùy chọn):</b> kịch bản cho một "troll bot" giọng nói tự bắt máy và kéo dài đối thoại với các số bị định vị là kẻ lừa đảo để lãng phí tài nguyên của chúng.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lecture" id="lec-09">
+      <div class="lec-head">
+        <span class="lec-num">Lecture 09</span>
+        <span class="speaker"><b>Anjney Midha</b> · AMP PBC (Founder) · CS153 instructor</span>
+        <span class="watch"><a href="https://www.youtube.com/watch?v=O5PfU_uDhS0">Xem trên YouTube ↗</a></span>
+      </div>
+      <h2>The Frontier Compute Stack</h2>
+      <p class="lec-sub">Bài giảng tổng quan của người đứng lớp: ngăn xếp 8 lớp, scaling laws thực nghiệm, "compute crunch", và vì sao điện toán chưa phải hàng hóa. Bấm vào mốc thời gian để nhảy tới đoạn tương ứng.</p>
+
+      <div class="ideas-label">10 ý tưởng cốt lõi</div>
+      <ol class="ideas">
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=637s">10:37</a><b>Bản chất hệ thống của ngăn xếp công nghệ mới</b> (The New Stack Rewrites). Ngành phần mềm đang trải qua một cuộc đại tái thiết toàn diện (full-stack rewrite) sau 15 năm ổn định đám mây. Ngăn xếp mới gồm 8 lớp phụ thuộc chặt chẽ: Vốn (Capital) → Điện năng/Data Center (land/power/shell) → Chip phần cứng → Hạ tầng đám mây (cloud) → Mô hình/Đại lý (models/agents) → Ứng dụng (applications) → Giải pháp thực tế (solutions) → Khung quản trị an toàn (governance/safety). Sự bất định và xáo trộn này mở ra cơ hội vĩ đại cho những nhà kiến trúc hệ thống mới.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=254s">04:14</a><b>Luật mở rộng mang tính thực nghiệm</b> (Scaling Laws are Empirical). Giống các định luật vật lý trong tự nhiên, scaling laws trong học sâu mang tính thực nghiệm (empirical) chứ không phải tiên đoán (predictive). Vòng lặp công nghiệp hóa ngày nay gồm: huấn luyện nền tảng diện rộng (base training — ~2 lần/năm trên cụm 100K GPU) → huấn luyện năng lực trung hạn (mid-training — 2–4 lần/năm, tốn ~10% compute) → tinh chỉnh hậu huấn luyện liên tục (continuous post-training qua SFT và học tăng cường RL).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=953s">15:53</a><b>Đột phá từ học tăng cường</b> (The Reinforcement Learning Boom). Bước ngoặt lớn nhất của Frontier AI hiện tại là giai đoạn hậu huấn luyện qua Học tăng cường (RL). Chi phí tính toán cho chuỗi suy luận logic (reasoning) trong bước RL đang tăng vọt, tiêu tốn năng lượng và compute gần bằng tất cả các bước huấn luyện trước cộng lại. RL hiệu quả nhờ LLM đã sở hữu sẵn các "tri thức nền" (priors) đủ thông minh về thế giới.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=1490s">24:50</a><b>Chiến tranh giành giật vòng lặp phản hồi ngữ cảnh</b> (The Context Loop Wars). Trong kỷ nguyên AI, ngữ cảnh/môi trường vận hành (context/environment) của đại lý là tài sản sống còn. Giá trị bền vững thuộc về đội ngũ sở hữu quyền truy cập độc quyền và có khả năng xác thực (verify) tính chính xác của tác vụ trong môi trường đó (ví dụ: viết mã có unit tests, hoặc thí nghiệm vật lý). Cuộc chiến lộ diện qua việc OpenAI âm thầm mua lại các môi trường lập trình (IDE như Windsurf) và lập tức bị Anthropic cắt quyền truy cập API để ngăn rò rỉ dữ liệu chưng cất (context leakage).</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=1846s">30:46</a><b>Sự bùng nổ của "Sovereign AI"</b> (trí tuệ nhân tạo chủ quyền). Với các hệ thống AI tham gia tác vụ trọng yếu (mission-critical), các chính phủ và tập đoàn lớn không còn chấp nhận chuyển dữ liệu nhạy cảm (hồ sơ quốc gia, quốc phòng, y tế) lên máy chủ đám mây xuyên biên giới chịu giám sát của luật nước ngoài (như Cloud Act của Mỹ). Xu hướng này thúc đẩy các Frontier Lab bản địa (như Mistral AI tại Pháp) tập trung phát hành mô hình mở (open weights) để vận hành cục bộ, "unbundle" thế độc quyền của các ông lớn hạ tầng đám mây cũ.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=2640s">44:00</a><b>Trọng tâm kinh doanh: đổi phần cứng lấy phần mềm</b> (The Infrastructure Trade). Bản chất kinh tế của các Frontier Lab hiện nay là một cỗ máy chuyển đổi hạ tầng: biến tài sản vật lý thô (capex phần cứng, điện năng, đất đai) thành tài sản trí tuệ (phần mềm/AI). Trong khi tài sản vật lý thô thường chỉ được định giá 3–4 lần doanh thu, phần mềm AI native có hệ số định giá tới 30–40 lần doanh thu. Mỗi đợt nâng cấp compute, năng lực mô hình tăng và doanh thu nhảy vọt theo một tỷ lệ thực nghiệm rất rõ ràng.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=2862s">47:42</a><b>Cơn sốt "hoarding" và ảo ảnh "chip là hàng hóa"</b> (The Compute Crunch). Phố Wall và nhiều chuyên gia kinh tế mắc sai lầm khi giả định chip điện toán là hàng hóa thông thường (commodities) sẽ liên tục mất giá. Thực tế, ngành đang rơi vào khủng hoảng thiếu hụt nghiêm trọng (compute crunch): dù H100 đã ra mắt hơn 2 năm, giá thuê GPU/giờ không hề giảm mà liên tục leo thang (từ ~$1,73/giờ vọt lên đỉnh gần $4,00/giờ), thúc đẩy các tập đoàn lớn điên cuồng gom hàng và tích trữ (hoarding) mọi nguồn lực hạ tầng có sẵn.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=3061s">51:01</a><b>Tính chu kỳ và các cuộc hoảng loạn hạ tầng trong lịch sử</b> (Infrastructure Cycles). Lịch sử kinh tế cho thấy mọi công nghệ tổng hợp (general purpose technology) — từ ngành thép (Panic of 1873), sợi cáp quang (fiber optic bubble), bộ nhớ DRAM, đến vận tải biển — đều đi qua một chu kỳ bất biến: giá tăng vọt do tích trữ → bùng nổ rồi đổ vỡ (boom and bust) → chính phủ hoặc thị trường định hình lại tiêu chuẩn → bình ổn hạ tầng. AI là cuộc va chạm chưa từng có giữa "atoms" (xây data center, kéo điện hạt nhân mất nhiều năm) và "bits" (tốc độ tăng trưởng phần mềm tính bằng tuần), khiến chu kỳ biến động cực kỳ dữ dội.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=3455s">57:35</a><b>Nút thắt lớn nhất của compute: không thể thay thế và khó dự đoán.</b> Khác với điện năng (megawatt nào cũng như nhau và có thể hòa chung lưới), compute hiện nay không phải hàng hóa vì không thể thay thế (non-fungible): H100 khác Blackwell, khác B300, không thể hoán đổi tùy tiện. Đồng thời compute cực kỳ khó dự đoán (hard to forecast): nhu cầu huấn luyện (training) bùng nổ theo "spiky" (đột biến cụm), nhu cầu suy luận (inference) biến thiên liên tục theo chu kỳ ngày/đêm của người dùng — khiến quy hoạch hạ tầng gặp rủi ro lớn.</li>
+        <li><a class="ts" href="https://www.youtube.com/watch?v=O5PfU_uDhS0&amp;t=3597s">59:57</a><b>Giải pháp tương lai: tiêu chuẩn kỹ thuật và định chế điều phối</b> (Pre-standardization Era). Chúng ta đang sống trong kỷ nguyên "tiền tiêu chuẩn hóa của điện toán" (pre-standardization of compute). Để biến một nguồn lực khan hiếm bị lũng đoạn thành hạ tầng đại chúng cho mọi lập trình viên, nhân loại buộc phải giải hai bài toán lịch sử:
+          <ul class="sub">
+            <li><b>Tiêu chuẩn kỹ thuật chung (Technical Standards):</b> định hình các giao thức kết nối, đo lường và định giá năng lực trí tuệ thống nhất (như dòng điện AC/DC hay giao thức TCP/IP).</li>
+            <li><b>Định chế điều phối (Institutions):</b> các tổ chức có thẩm quyền đứng ra phân bổ, điều tiết nguồn lực compute rời khỏi các kho tích trữ tư nhân để phục vụ lợi ích công cộng (public benefit).</li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="actions">
+        <div class="actions-label">3 gợi ý thực hành</div>
+        <ol class="act">
+          <li><span class="at">Xây hệ thống đo lường hiệu năng tính toán (Micro-Benchmark Compute).</span>
+            <span class="goal"><b>Mục tiêu:</b> hiểu cách đo hiệu năng phần cứng thực tế khi chạy tác vụ AI, vượt qua các thông số quảng cáo lý thuyết.</span>
+            <span class="do"><b>Thực hiện:</b> viết một đoạn Python (dùng <code>time</code>, <code>psutil</code>, hoặc <code>pynvml</code> nếu có GPU) đo tài nguyên tiêu thụ khi huấn luyện/suy luận một mô hình nhỏ (MobileNet hoặc GPT-2 mini). (1) ghi nhận thời gian xử lý, lượng RAM/VRAM, và tỷ lệ chip hoạt động (core utilization); (2) thay đổi batch size hoặc chiều dài ngữ cảnh để quan sát thời điểm hệ thống nghẽn (bottleneck) hoặc tràn bộ nhớ (out of memory), tập tư duy quy hoạch tài nguyên từ mức vi mô.</span></li>
+          <li><span class="at">Nghiên cứu Chinchilla Scaling Laws và viết báo cáo định giá điện toán.</span>
+            <span class="goal"><b>Mục tiêu:</b> đọc hiểu tài liệu học thuật bắt buộc và áp dụng vào tư duy toán học quản trị hệ thống (kiểu Arthur Mensch, Mistral AI).</span>
+            <span class="do"><b>Thực hiện:</b> tìm và đọc kỹ bài gốc "Training Compute-Optimal Large Language Models" (Chinchilla scaling laws của DeepMind), rồi viết bản tóm tắt ~1 trang Markdown giải thích quan hệ giữa: số tham số mô hình (N), khối lượng dữ liệu huấn luyện (D) và tổng compute yêu cầu (C). Trả lời: vì sao tăng kích thước mô hình quá lớn mà không chuẩn bị đủ token dữ liệu tương ứng lại là một sự lãng phí compute nghiêm trọng?</span></li>
+          <li><span class="at">Thiết kế mô hình phân bổ compute cho dự án một người (One-Person Frontier Lab).</span>
+            <span class="goal"><b>Mục tiêu:</b> thực hành tư duy cược phi đối xứng (asymmetric bets), tận dụng tài nguyên mở và chưng cất để tối ưu chi phí cho MVP.</span>
+            <span class="do"><b>Thực hiện:</b> giả định bạn tự xây một ứng dụng AI chuyên biệt (ví dụ: chẩn đoán lỗi y tế từ ảnh X-quang địa phương). Với ngân sách cực hạn hẹp, lập một bản chiến lược hạ tầng: bạn có nên tự thuê cụm H100 đắt đỏ không? Hay tối ưu hơn là tải các mô hình mở có trọng số sẵn (Llama-3 hoặc Mistral) về local, dùng quantization (lượng tử hóa để nén mô hình chạy trên phần cứng rẻ hơn) kết hợp LoRA (fine-tuning tốn ít tài nguyên)? Chứng minh phương án của bạn tối ưu chuỗi "hard assets" (vốn phần cứng) đổi lấy "software utility" (giá trị sử dụng phần mềm) hiệu quả nhất.</span></li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+</div>
+</body>
+</html>
